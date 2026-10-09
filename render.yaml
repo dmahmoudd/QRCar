@@ -1,0 +1,25 @@
+# Render Blueprint for the QrCar API.
+# Render does not offer SQL Server. Do not attach Render Postgres to this service —
+# the app uses EF Core SQL Server. Point ConnectionStrings__DefaultConnection at
+# Azure SQL (or another SQL Server) from the dashboard.
+services:
+  - type: web
+    name: qrcar-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health/live
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: Jwt__SigningKey
+        sync: false
+      - key: Security__EncryptionKey
+        sync: false
+      - key: Security__IpHashKey
+        sync: false
+      - key: Frontend__BaseUrl
+        sync: false

@@ -12,12 +12,11 @@ RUN dotnet publish src/QrCar.Api/QrCar.Api.csproj -c Release -o /app/publish --n
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
-RUN adduser --disabled-password --gecos "" appuser
-USER appuser
-COPY --from=build --chown=appuser:appuser /app/publish .
+COPY --from=build /app/publish .
 
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 EXPOSE 8080
+USER $APP_UID
 
 ENTRYPOINT ["dotnet", "QrCar.Api.dll"]

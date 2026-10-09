@@ -50,3 +50,6 @@ Thumbs.db
 artifacts/
 backend/**/appsettings.Production.json
 backend/**/appsettings.Local.json
+.env
+.env.*
+!.env.example
