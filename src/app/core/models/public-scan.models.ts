@@ -13,6 +13,14 @@ export interface PublicCar {
   acceptsRequests: boolean;
 }
 
+export interface OfficialScan extends PublicCar {
+  scanId: string;
+}
+
+export interface PublicBrowserAccess {
+  requiresOfficialApp: boolean;
+}
+
 export interface CreateParkingRequestPayload {
   reason: string;
   message: string | null;

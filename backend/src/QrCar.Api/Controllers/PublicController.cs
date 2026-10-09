@@ -7,8 +7,9 @@ using QrCar.Application.Features.PublicScan.Dtos;
 namespace QrCar.Api.Controllers;
 
 /// <summary>
-/// The anonymous surface reached by scanning a sticker. Every response here is visible to the
-/// whole internet, so nothing that identifies the owner may be returned.
+/// The anonymous surface reached by scanning a sticker. GET lookups used by the public
+/// browser page never return owner or vehicle details. Contact data is issued only after
+/// the official scanner validates a token and receives a short-lived scan grant.
 /// </summary>
 [ApiController]
 [Route("api/v1/public")]
@@ -32,41 +33,66 @@ public class PublicController : ControllerBase
     }
 
     /// <summary>
-    /// Resolves a scanned token to a minimal description of the car. Returns 410 when the
-    /// sticker belongs to a car that has since been removed.
+    /// Public sticker URL lookup. Does not confirm whether the token exists and never
+    /// returns phone, location, or other vehicle fields. Query flags such as fromApp
+    /// are ignored.
     /// </summary>
     [HttpGet("cars/{token}")]
     [EnableRateLimiting(RateLimitPolicies.PublicScan)]
-    [ProducesResponseType(typeof(PublicCarResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status410Gone)]
-    public async Task<ActionResult<PublicCarResponse>> GetCarByToken(
-        string token,
-        CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(PublicBrowserAccessResponse), StatusCodes.Status200OK)]
+    public ActionResult<PublicBrowserAccessResponse> GetCarByToken(string token)
     {
         Response.Headers.CacheControl = "no-store";
-        return Ok(await _publicScanService.GetCarByTokenAsync(token, cancellationToken));
+        return Ok(_publicScanService.GetBrowserAccess());
     }
 
     /// <summary>
-    /// Hands the phone's dialer the number without putting it in the scan page HTML.
-    /// The number still appears on the call screen — that is how a phone call works.
+    /// Token-based Call is closed. Knowing the printed sticker token is not enough.
     /// </summary>
     [HttpGet("cars/{token}/call")]
     [EnableRateLimiting(RateLimitPolicies.PublicScan)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> CallOwner(string token, CancellationToken cancellationToken)
-    {
-        var phone = await _publicScanService.GetOwnerPhoneAsync(token, cancellationToken);
-        return ContactLaunchPage("Call", $"tel:{phone}");
-    }
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult CallOwnerByToken(string token) => NotFound();
 
     [HttpGet("cars/{token}/whatsapp")]
     [EnableRateLimiting(RateLimitPolicies.PublicScan)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> WhatsAppOwner(string token, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult WhatsAppOwnerByToken(string token) => NotFound();
+
+    /// <summary>
+    /// Official scanner validation. Looks up the token, records a scan, and issues a
+    /// short-lived grant for Call / WhatsApp. This is not native-app attestation.
+    /// </summary>
+    [HttpPost("scans")]
+    [EnableRateLimiting(RateLimitPolicies.PublicScan)]
+    [ProducesResponseType(typeof(OfficialScanResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status410Gone)]
+    public async Task<ActionResult<OfficialScanResponse>> CreateOfficialScan(
+        [FromBody] CreateOfficialScanRequest request,
+        CancellationToken cancellationToken)
     {
-        var phone = await _publicScanService.GetOwnerPhoneAsync(token, cancellationToken);
+        Response.Headers.CacheControl = "no-store";
+        return Ok(await _publicScanService.CreateOfficialScanAsync(request.Token, cancellationToken));
+    }
+
+    [HttpGet("scans/{scanId}/call")]
+    [EnableRateLimiting(RateLimitPolicies.PublicScan)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CallOwner(string scanId, CancellationToken cancellationToken)
+    {
+        var phone = await _publicScanService.GetOwnerPhoneForScanAsync(scanId, cancellationToken);
+        return ContactLaunchPage("Call", $"tel:{phone}");
+    }
+
+    [HttpGet("scans/{scanId}/whatsapp")]
+    [EnableRateLimiting(RateLimitPolicies.PublicScan)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> WhatsAppOwner(string scanId, CancellationToken cancellationToken)
+    {
+        var phone = await _publicScanService.GetOwnerPhoneForScanAsync(scanId, cancellationToken);
         var digits = new string(phone.Where(char.IsDigit).ToArray());
         return ContactLaunchPage("Open WhatsApp", $"https://wa.me/{digits}");
     }
@@ -93,22 +119,31 @@ public class PublicController : ControllerBase
     }
 
     /// <summary>
-    /// Asks the owner to come to their car. The response carries only a tracking reference:
-    /// the requester never learns who the owner is or how they were contacted.
+    /// Token-based parking requests are closed. Knowing the printed sticker token is not enough.
     /// </summary>
     [HttpPost("cars/{token}/requests")]
     [EnableRateLimiting(RateLimitPolicies.PublicRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult CreateRequestByToken(string token) => NotFound();
+
+    /// <summary>
+    /// Asks the owner to come to their car after official scanner validation.
+    /// The response carries only a tracking reference.
+    /// </summary>
+    [HttpPost("scans/{scanId}/requests")]
+    [EnableRateLimiting(RateLimitPolicies.PublicRequest)]
     [ProducesResponseType(typeof(ParkingRequestCreatedResponse), StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<ActionResult<ParkingRequestCreatedResponse>> CreateRequest(
-        string token,
+        string scanId,
         CreateParkingRequestRequest request,
         CancellationToken cancellationToken)
     {
-        var response = await _publicScanService.CreateRequestAsync(
-            token,
+        var response = await _publicScanService.CreateRequestForScanAsync(
+            scanId,
             request,
             HttpContext.Connection.RemoteIpAddress?.ToString(),
             Request.Headers.UserAgent.ToString(),

@@ -4,9 +4,9 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   CreateParkingRequestPayload,
+  OfficialScan,
   ParkingReasonOption,
   ParkingRequestCreated,
-  PublicCar,
   PublicRequestStatus,
 } from '../models/public-scan.models';
 
@@ -23,24 +23,24 @@ export class PublicScanApiService {
     return this.http.get<ParkingReasonOption[]>(`${this.baseUrl}/reasons`);
   }
 
-  getCarByToken(token: string): Observable<PublicCar> {
-    return this.http.get<PublicCar>(`${this.baseUrl}/cars/${encodeURIComponent(token)}`);
+  createOfficialScan(token: string): Observable<OfficialScan> {
+    return this.http.post<OfficialScan>(`${this.baseUrl}/scans`, { token });
   }
 
-  callUrl(token: string): string {
-    return `${this.baseUrl}/cars/${encodeURIComponent(token)}/call`;
+  callUrl(scanId: string): string {
+    return `${this.baseUrl}/scans/${encodeURIComponent(scanId)}/call`;
   }
 
-  whatsAppUrl(token: string): string {
-    return `${this.baseUrl}/cars/${encodeURIComponent(token)}/whatsapp`;
+  whatsAppUrl(scanId: string): string {
+    return `${this.baseUrl}/scans/${encodeURIComponent(scanId)}/whatsapp`;
   }
 
   createRequest(
-    token: string,
+    scanId: string,
     payload: CreateParkingRequestPayload,
   ): Observable<ParkingRequestCreated> {
     return this.http.post<ParkingRequestCreated>(
-      `${this.baseUrl}/cars/${encodeURIComponent(token)}/requests`,
+      `${this.baseUrl}/scans/${encodeURIComponent(scanId)}/requests`,
       payload,
     );
   }

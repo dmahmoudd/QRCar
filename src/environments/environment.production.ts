@@ -8,4 +8,14 @@ export const environment = {
    */
   apiBaseUrl: '/api/v1',
   scanAllowedOrigins: OFFICIAL_TALA3NY_ORIGINS,
+  officialScannerPath: '/scan',
+  /**
+   * Native-app launch targets. Empty until an official Tala3ny app and store
+   * listings exist. Do not invent store URLs or pretend this website is that app.
+   */
+  appLaunch: {
+    deepLink: '',
+    iosStoreUrl: '',
+    androidStoreUrl: '',
+  },
 };

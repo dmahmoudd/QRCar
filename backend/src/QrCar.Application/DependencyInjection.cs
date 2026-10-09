@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using QrCar.Application.Common.Interfaces;
 using QrCar.Application.Features.Auth;
 using QrCar.Application.Features.Cars;
 using QrCar.Application.Features.ParkingRequests;
@@ -17,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICarService, CarService>();
+        services.AddSingleton<IScanGrantStore, MemoryScanGrantStore>();
         services.AddScoped<IPublicScanService, PublicScanService>();
         services.AddScoped<IParkingRequestService, ParkingRequestService>();
 

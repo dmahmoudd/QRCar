@@ -17,6 +17,7 @@ public class PublicScanService : IPublicScanService
     private readonly IIpHasher _ipHasher;
     private readonly IEncryptionService _encryption;
     private readonly IDateTimeProvider _clock;
+    private readonly IScanGrantStore _scanGrants;
     private readonly PublicScanOptions _options;
 
     public PublicScanService(
@@ -25,6 +26,7 @@ public class PublicScanService : IPublicScanService
         IIpHasher ipHasher,
         IEncryptionService encryption,
         IDateTimeProvider clock,
+        IScanGrantStore scanGrants,
         IOptions<PublicScanOptions> options)
     {
         _db = db;
@@ -32,12 +34,15 @@ public class PublicScanService : IPublicScanService
         _ipHasher = ipHasher;
         _encryption = encryption;
         _clock = clock;
+        _scanGrants = scanGrants;
         _options = options.Value;
     }
 
     public IReadOnlyList<ParkingReasonOption> GetReasons() => ParkingReasonCatalog.All;
 
-    public async Task<PublicCarResponse> GetCarByTokenAsync(
+    public PublicBrowserAccessResponse GetBrowserAccess() => new(true);
+
+    public async Task<OfficialScanResponse> CreateOfficialScanAsync(
         string publicToken,
         CancellationToken cancellationToken = default)
     {
@@ -48,8 +53,12 @@ public class PublicScanService : IPublicScanService
 
         var owner = car.User;
         var phone = _encryption.Decrypt(owner.PhoneNumberEncrypted);
+        var scanId = _scanGrants.Issue(
+            car.PublicToken,
+            ScanGrantOperations.Contact | ScanGrantOperations.Request);
 
-        return new PublicCarResponse(
+        return new OfficialScanResponse(
+            scanId,
             PhoneMasker.Mask(phone),
             owner.ShareLocation,
             owner.ShareLocation ? owner.LastLatitude : null,
@@ -58,9 +67,17 @@ public class PublicScanService : IPublicScanService
             car.IsActive);
     }
 
-    public async Task<string> GetOwnerPhoneAsync(
-        string publicToken,
+    public async Task<string> GetOwnerPhoneForScanAsync(
+        string scanId,
         CancellationToken cancellationToken = default)
+    {
+        var publicToken = RequireGrantedToken(scanId, ScanGrantOperations.Contact);
+        return await GetOwnerPhoneAsync(publicToken, cancellationToken);
+    }
+
+    private async Task<string> GetOwnerPhoneAsync(
+        string publicToken,
+        CancellationToken cancellationToken)
     {
         var car = await LoadCarByTokenAsync(publicToken, cancellationToken);
 
@@ -72,12 +89,33 @@ public class PublicScanService : IPublicScanService
         return _encryption.Decrypt(car.User.PhoneNumberEncrypted);
     }
 
-    public async Task<ParkingRequestCreatedResponse> CreateRequestAsync(
-        string publicToken,
+    public async Task<ParkingRequestCreatedResponse> CreateRequestForScanAsync(
+        string scanId,
         CreateParkingRequestRequest request,
         string? requesterIp,
         string? userAgent,
         CancellationToken cancellationToken = default)
+    {
+        var publicToken = RequireGrantedToken(scanId, ScanGrantOperations.Request);
+        return await CreateRequestAsync(publicToken, request, requesterIp, userAgent, cancellationToken);
+    }
+
+    private string RequireGrantedToken(string scanId, ScanGrantOperations required)
+    {
+        if (!_scanGrants.TryGet(scanId, required, out var publicToken))
+        {
+            throw new NotFoundException("This QR code is not recognised.");
+        }
+
+        return publicToken;
+    }
+
+    private async Task<ParkingRequestCreatedResponse> CreateRequestAsync(
+        string publicToken,
+        CreateParkingRequestRequest request,
+        string? requesterIp,
+        string? userAgent,
+        CancellationToken cancellationToken)
     {
         var car = await LoadCarByTokenAsync(publicToken, cancellationToken);
 
@@ -173,7 +211,7 @@ public class PublicScanService : IPublicScanService
     /// </summary>
     private async Task<Car> LoadCarByTokenAsync(string publicToken, CancellationToken cancellationToken)
     {
-        var token = publicToken.Trim();
+        var token = publicToken?.Trim() ?? string.Empty;
 
         if (!PublicTokenFormat.IsWellFormed(token))
         {

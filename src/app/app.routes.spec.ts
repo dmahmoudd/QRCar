@@ -20,6 +20,10 @@ describe('app routes', () => {
 
   it('keeps the owner area behind authGuard', () => {
     expect(ownerShell()?.canActivate).toEqual([authGuard]);
+    const childPaths = ownerShell()?.children?.map((route) => route.path) ?? [];
+    expect(childPaths).toContain('cars');
+    expect(childPaths).toContain('cars/new');
+    expect(childPaths).toContain('cars/:carId');
   });
 
   it('keeps login and register behind guestGuard', () => {

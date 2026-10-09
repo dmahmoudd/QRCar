@@ -1,20 +1,32 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { OfficialScan } from '../../core/models/public-scan.models';
 import { QrCameraService } from '../../core/qr/qr-camera.service';
 import { ScanPage } from './scan-page';
 
 const TOKEN = 'AbcdefghijkLMNOP12345-';
 const OFFICIAL_URL = `https://qrcar.pages.dev/c/${TOKEN}`;
+const SCAN_ID = 'scan-grant-1';
+
+const recognised: OfficialScan = {
+  scanId: SCAN_ID,
+  maskedPhone: '+20 ••• ••• 1234',
+  shareLocation: false,
+  lastLatitude: null,
+  lastLongitude: null,
+  lastLocatedAtUtc: null,
+  acceptsRequests: true,
+};
 
 describe('ScanPage', () => {
   let fixture: ComponentFixture<ScanPage>;
   let page: ScanPage;
   let router: jasmine.SpyObj<Router>;
   let camera: jasmine.SpyObj<QrCameraService>;
-  let http: HttpClient;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
     router = jasmine.createSpyObj('Router', ['navigate']);
@@ -35,45 +47,85 @@ describe('ScanPage', () => {
       ],
     }).compileComponents();
 
-    http = TestBed.inject(HttpClient);
-    spyOn(http, 'get').and.callThrough();
-    spyOn(http, 'post').and.callThrough();
-
+    http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(ScanPage);
     page = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('navigates internally for an official Tala3ny URL and never opens that URL', async () => {
-    await page.onDecoded(OFFICIAL_URL);
-
-    expect(router.navigate).toHaveBeenCalledOnceWith(['/c', TOKEN]);
-    expect(http.get).not.toHaveBeenCalled();
-    expect(http.post).not.toHaveBeenCalled();
+  afterEach(() => {
+    http.verify();
   });
 
-  it('navigates internally for a bare public token', async () => {
-    await page.onDecoded(TOKEN);
+  it('does not request the camera until the user presses Start scanning', () => {
+    expect(camera.start).not.toHaveBeenCalled();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Start scanning');
+  });
 
-    expect(router.navigate).toHaveBeenCalledOnceWith(['/c', TOKEN]);
-    expect(http.get).not.toHaveBeenCalled();
+  it('validates an official Tala3ny URL with the server and never opens that URL', async () => {
+    const pending = page.onDecoded(OFFICIAL_URL);
+    const request = http.expectOne(`${environment.apiBaseUrl}/public/scans`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ token: TOKEN });
+    request.flush(recognised);
+    await pending;
+    fixture.detectChanges();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('Recognised Tala3ny code');
+    expect(text).toContain(recognised.maskedPhone);
+    expect(text).toContain('Call');
+    expect(text).toContain('WhatsApp');
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('validates a bare public token the same way', async () => {
+    const pending = page.onDecoded(TOKEN);
+    http.expectOne(`${environment.apiBaseUrl}/public/scans`).flush(recognised);
+    await pending;
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Recognised Tala3ny code');
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('rejects an external QR without calling the API or navigating', async () => {
     await page.onDecoded(`https://evil.example/c/${TOKEN}`);
 
     expect(router.navigate).not.toHaveBeenCalled();
-    expect(http.get).not.toHaveBeenCalled();
     expect(page['errorMessage']()).toBe('This is not a valid Tala3ny QR code.');
   });
 
-  it('does not navigate twice for the same valid scan', async () => {
-    await page.onDecoded(OFFICIAL_URL);
+  it('does not validate twice for the same valid scan', async () => {
+    const first = page.onDecoded(OFFICIAL_URL);
+    http.expectOne(`${environment.apiBaseUrl}/public/scans`).flush(recognised);
+    await first;
+
     await page.onDecoded(OFFICIAL_URL);
     await page.onDecoded(TOKEN);
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
 
-    expect(router.navigate).toHaveBeenCalledTimes(1);
-    expect(router.navigate).toHaveBeenCalledWith(['/c', TOKEN]);
+  it('keeps unknown and revoked codes rejected', async () => {
+    const missing = page.onDecoded(OFFICIAL_URL);
+    http.expectOne(`${environment.apiBaseUrl}/public/scans`).flush(
+      { title: 'Not found' },
+      { status: 404, statusText: 'Not Found' },
+    );
+    await missing;
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain("isn't recognised");
+    expect((fixture.nativeElement as HTMLElement).textContent).not.toContain(recognised.maskedPhone);
+
+    page.resetResult();
+    const retired = page.onDecoded(TOKEN);
+    http.expectOne(`${environment.apiBaseUrl}/public/scans`).flush(
+      { title: 'Gone' },
+      { status: 410, statusText: 'Gone' },
+    );
+    await retired;
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('no longer active');
   });
 
   it('shows a clear message when camera permission is denied', async () => {
@@ -88,11 +140,6 @@ describe('ScanPage', () => {
   });
 
   it('stops the camera when the user cancels', async () => {
-    camera.start.and.callFake(async (video, onText) => {
-      expect(video).toBeTruthy();
-      onText(TOKEN);
-    });
-
     await page.startScanning();
     camera.stop.calls.reset();
 

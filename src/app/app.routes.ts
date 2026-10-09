@@ -19,7 +19,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        title: 'Contact the owner',
+        title: 'Open Tala3ny Scanner',
         loadComponent: () =>
           import('./features/public-scan/scan-landing').then((m) => m.ScanLanding),
       },

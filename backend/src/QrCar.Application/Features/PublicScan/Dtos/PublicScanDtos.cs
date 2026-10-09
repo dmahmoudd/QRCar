@@ -3,16 +3,25 @@ namespace QrCar.Application.Features.PublicScan.Dtos;
 public record ParkingReasonOption(string Code, string Label, bool RequiresMessage);
 
 /// <summary>
-/// What a scanner sees. The full phone number is never included; only a masked hint.
-/// Call and WhatsApp go through dedicated redirect endpoints so the page itself stays clean.
+/// Returned by GET /public/cars/{token}. Contains no vehicle, phone, or location fields.
+/// Query flags such as fromApp are ignored by the API and cannot change this.
 /// </summary>
-public record PublicCarResponse(
+public record PublicBrowserAccessResponse(bool RequiresOfficialApp);
+
+/// <summary>
+/// What the official scanner sees after POST /public/scans. The full phone number is never
+/// included; only a masked hint. Call and WhatsApp use the short-lived <see cref="ScanId"/>.
+/// </summary>
+public record OfficialScanResponse(
+    string ScanId,
     string MaskedPhone,
     bool ShareLocation,
     double? LastLatitude,
     double? LastLongitude,
     DateTime? LastLocatedAtUtc,
     bool AcceptsRequests);
+
+public record CreateOfficialScanRequest(string Token);
 
 public record CreateParkingRequestRequest(string Reason, string? Message);
 

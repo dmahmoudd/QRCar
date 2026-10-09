@@ -27,4 +27,18 @@ export const environment = {
       `http://${currentHostname()}:4200`,
     ];
   },
+  /**
+   * Official website scanner. Production is https://qrcar.pages.dev/scan.
+   * The camera is not started by opening this path.
+   */
+  officialScannerPath: '/scan',
+  /**
+   * Native-app launch targets. Empty until an official Tala3ny app and store
+   * listings exist. Do not invent store URLs.
+   */
+  appLaunch: {
+    deepLink: '',
+    iosStoreUrl: '',
+    androidStoreUrl: '',
+  },
 };
