@@ -1,0 +1,19 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=QrCarDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+  },
+  "Jwt": {
+    "Issuer": "QrCar.Api",
+    "Audience": "QrCar.Client",
+    "SigningKey": "GENERATE_A_LOCAL_KEY_AT_LEAST_32_CHARACTERS_LONG",
+    "AccessTokenMinutes": 60
+  },
+  "Security": {
+    "EncryptionKey": "GENERATE_BASE64_32_BYTE_KEY",
+    "IpHashKey": "GENERATE_BASE64_32_BYTE_KEY"
+  },
+  "Frontend": {
+    "BaseUrl": "http://localhost:4200",
+    "ScanPathTemplate": "/c/{token}"
+  }
+}
