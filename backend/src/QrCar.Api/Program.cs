@@ -227,11 +227,9 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
+    // MonsterASP currently serves this site on HTTP only. Forcing HTTPS here logs
+    // "Failed to determine the https port" and would send clients to a dead :443.
     app.UseHsts();
-    // Render (and other hosts) probe health over HTTP. TLS terminates at the proxy.
-    app.UseWhen(
-        context => !context.Request.Path.StartsWithSegments("/health"),
-        branch => branch.UseHttpsRedirection());
 }
 
 app.UseCors(CorsPolicyName);

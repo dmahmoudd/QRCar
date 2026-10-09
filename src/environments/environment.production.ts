@@ -1,8 +1,8 @@
 export const environment = {
   production: true,
   /**
-   * Absolute public API URL. Cloudflare Pages and Render are different origins, so this
-   * cannot be a relative `/api/v1` path. Change the host to match the Render service.
+   * Same-origin so the browser stays on HTTPS (Cloudflare Pages). A Pages Function
+   * forwards /api/v1 to the MonsterASP API, which does not have working TLS yet.
    */
-  apiBaseUrl: 'https://qrcar.runasp.net/api/v1',
+  apiBaseUrl: '/api/v1',
 };
