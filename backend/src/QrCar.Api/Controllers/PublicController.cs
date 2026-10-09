@@ -54,22 +54,42 @@ public class PublicController : ControllerBase
     /// </summary>
     [HttpGet("cars/{token}/call")]
     [EnableRateLimiting(RateLimitPolicies.PublicScan)]
-    [ProducesResponseType(StatusCodes.Status302Found)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> CallOwner(string token, CancellationToken cancellationToken)
     {
         var phone = await _publicScanService.GetOwnerPhoneAsync(token, cancellationToken);
-        Response.Headers.Location = $"tel:{phone}";
-        return StatusCode(StatusCodes.Status302Found);
+        return ContactLaunchPage("Call", $"tel:{phone}");
     }
 
     [HttpGet("cars/{token}/whatsapp")]
     [EnableRateLimiting(RateLimitPolicies.PublicScan)]
-    [ProducesResponseType(StatusCodes.Status302Found)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> WhatsAppOwner(string token, CancellationToken cancellationToken)
     {
         var phone = await _publicScanService.GetOwnerPhoneAsync(token, cancellationToken);
         var digits = new string(phone.Where(char.IsDigit).ToArray());
-        return Redirect($"https://wa.me/{digits}");
+        return ContactLaunchPage("Open WhatsApp", $"https://wa.me/{digits}");
+    }
+
+    /// <summary>
+    /// Proxies (Cloudflare Pages) drop 302 Location headers, which left a black tab on phones.
+    /// A 200 HTML page with a refresh + link still reaches WhatsApp and the dialer.
+    /// </summary>
+    private static ContentResult ContactLaunchPage(string label, string url)
+    {
+        var safe = System.Net.WebUtility.HtmlEncode(url);
+        return new ContentResult
+        {
+            StatusCode = StatusCodes.Status200OK,
+            ContentType = "text/html; charset=utf-8",
+            Content =
+                $"<!doctype html><html><head><meta charset=\"utf-8\">" +
+                $"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" +
+                $"<meta http-equiv=\"refresh\" content=\"0;url={safe}\">" +
+                $"<title>{label}</title></head>" +
+                $"<body style=\"font-family:system-ui;padding:1.5rem\">" +
+                $"<p><a href=\"{safe}\">{label}</a></p></body></html>",
+        };
     }
 
     /// <summary>

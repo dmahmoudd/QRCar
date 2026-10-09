@@ -147,6 +147,12 @@ async function proxyContactRedirect(
     return;
   }
 
+  const html = await response.text();
+  if (response.ok && html.includes('<a href=')) {
+    res.status(200).type('html').send(html);
+    return;
+  }
+
   res.status(response.status).type('html').send(
     scanDocument('Could not start the call', '<p>Try again in a moment.</p>'),
   );

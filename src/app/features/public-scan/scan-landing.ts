@@ -66,7 +66,7 @@ import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
               <mat-icon>call</mat-icon>
               Call
             </a>
-            <a mat-stroked-button class="!h-12" [href]="whatsAppUrl()" target="_blank" rel="noopener">
+            <a mat-stroked-button class="!h-12" [href]="whatsAppUrl()">
               <mat-icon>chat</mat-icon>
               WhatsApp
             </a>

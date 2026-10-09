@@ -18,9 +18,40 @@ export async function onRequest(context) {
   }
 
   const upstream = await fetch(target, init);
+  const location = upstream.headers.get('location');
+
+  if (location && upstream.status >= 300 && upstream.status < 400) {
+    return redirectClient(location, upstream.status);
+  }
+
   return new Response(upstream.body, {
     status: upstream.status,
     statusText: upstream.statusText,
     headers: upstream.headers,
   });
+}
+
+function redirectClient(location, status) {
+  const code = status === 301 ? 301 : 302;
+  const safe = escapeHtml(location);
+
+  return new Response(
+    `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=${safe}"></head><body><p><a href="${safe}">Continue</a></p></body></html>`,
+    {
+      status: code,
+      headers: {
+        Location: location,
+        'Content-Type': 'text/html; charset=utf-8',
+      },
+    },
+  );
+}
+
+function escapeHtml(value) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
 }
