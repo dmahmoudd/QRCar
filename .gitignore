@@ -41,3 +41,12 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# .NET backend
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+artifacts/
+backend/**/appsettings.Production.json
+backend/**/appsettings.Local.json

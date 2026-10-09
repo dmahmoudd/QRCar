@@ -1,0 +1,136 @@
+@host = http://localhost:5035
+@api = {{host}}/api/v1
+
+### 1. Register an account (returns an access token)
+# @name register
+POST {{api}}/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Ada Lovelace",
+  "email": "ada@example.com",
+  "password": "Passw0rd!23",
+  "phoneNumber": "+905551112233"
+}
+
+### 2. Log in
+# @name login
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "ada@example.com",
+  "password": "Passw0rd!23"
+}
+
+@token = {{login.response.body.accessToken}}
+
+### 3. My profile (the only endpoint that returns a phone number)
+GET {{api}}/users/me
+Authorization: Bearer {{token}}
+
+### 4. Update my profile
+PUT {{api}}/users/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fullName": "Ada L.",
+  "phoneNumber": "+905551112244",
+  "shareLocation": true
+}
+
+### 4b. Report last known location
+PUT {{api}}/users/me/location
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "latitude": 30.0444,
+  "longitude": 31.2357
+}
+
+### 5. Create a QR sticker
+# @name createCar
+POST {{api}}/cars
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nickname": "Windscreen"
+}
+
+@carId = {{createCar.response.body.id}}
+
+### 6. List my cars
+GET {{api}}/cars?page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+### 7. Get the car's QR token and scan URL
+# @name qr
+GET {{api}}/cars/{{carId}}/qr
+Authorization: Bearer {{token}}
+
+@publicToken = {{qr.response.body.publicToken}}
+
+### 8. Download the printable QR image
+GET {{api}}/cars/{{carId}}/qr/image?format=Png&size=512
+Authorization: Bearer {{token}}
+
+### 9. Rotate the QR code (invalidates every printed sticker)
+POST {{api}}/cars/{{carId}}/qr/rotate
+Authorization: Bearer {{token}}
+
+### --- Anonymous scanner flow: no Authorization header anywhere below ---
+
+### 10. Available reasons
+GET {{api}}/public/reasons
+
+### 11. Scan the code: minimal car info, no owner data
+GET {{api}}/public/cars/{{publicToken}}
+
+### 12. Ask the owner to move the car
+# @name parkingRequest
+POST {{api}}/public/cars/{{publicToken}}/requests
+Content-Type: application/json
+
+{
+  "reason": "BlockingMyCar",
+  "message": "You are blocking the garage exit on level 2."
+}
+
+@trackingRef = {{parkingRequest.response.body.trackingRef}}
+
+### 13. Scanner polls their own request
+GET {{api}}/public/requests/{{trackingRef}}
+
+### --- Owner handling the request ---
+
+### 14. Owner's inbox
+GET {{api}}/parking-requests?page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+### 15. Filter to pending only
+GET {{api}}/parking-requests?status=Pending
+Authorization: Bearer {{token}}
+
+### 16. Owner replies "on my way" (paste an id from the inbox)
+POST {{api}}/parking-requests/00000000-0000-0000-0000-000000000000/respond
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "responseType": "OnMyWay"
+}
+
+### 17. Owner marks it resolved
+POST {{api}}/parking-requests/00000000-0000-0000-0000-000000000000/resolve
+Authorization: Bearer {{token}}
+
+### --- Health ---
+
+### 18. Liveness
+GET {{host}}/health/live
+
+### 19. Readiness (checks SQL Server)
+GET {{host}}/health/ready

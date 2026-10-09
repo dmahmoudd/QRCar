@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/QrCar.Api/QrCar.Api.csproj" />
+    <Project Path="src/QrCar.Application/QrCar.Application.csproj" />
+    <Project Path="src/QrCar.Domain/QrCar.Domain.csproj" />
+    <Project Path="src/QrCar.Infrastructure/QrCar.Infrastructure.csproj" />
+  </Folder>
+</Solution>
