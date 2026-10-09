@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build && node scripts/ensure-spa-index.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:qr-car-app": "node dist/qr-car-app/server/server.mjs"

@@ -48,6 +48,7 @@
           },
           "configurations": {
             "production": {
+              "outputMode": "static",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",

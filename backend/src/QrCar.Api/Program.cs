@@ -1,9 +1,12 @@
 using System.Text;
+using System.Text.Json;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using QrCar.Api;
 using QrCar.Api.Filters;
@@ -14,6 +17,7 @@ using QrCar.Application;
 using QrCar.Application.Common.Interfaces;
 using QrCar.Infrastructure;
 using QrCar.Infrastructure.Identity;
+using QrCar.Infrastructure.Persistence;
 using QrCar.Infrastructure.QrCodes;
 using Scalar.AspNetCore;
 using Serilog;
@@ -21,6 +25,12 @@ using Serilog;
 const string CorsPolicyName = "AngularApp";
 
 var builder = WebApplication.CreateBuilder(args);
+
+var hostedPort = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(hostedPort))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{hostedPort}");
+}
 
 builder.Host.UseSerilog((context, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
@@ -49,6 +59,11 @@ builder.Services.AddOpenApi();
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    if (!builder.Environment.IsDevelopment())
+    {
+        options.KnownIPNetworks.Clear();
+        options.KnownProxies.Clear();
+    }
 });
 
 // ---------------------------------------------------------------------------
@@ -90,11 +105,11 @@ var frontendOptions = builder.Configuration
     .GetSection(FrontendOptions.SectionName)
     .Get<FrontendOptions>() ?? new FrontendOptions();
 
-var frontendOrigin = frontendOptions.BaseUrl.TrimEnd('/');
-var lanFrontendOrigin = LanAddress.ReplaceLocalhostWithLan(frontendOrigin);
+var corsOrigins = BuildCorsOrigins(frontendOptions, builder.Environment.IsDevelopment());
+EnsureProductionFrontendOrigin(frontendOptions, builder.Environment.IsDevelopment());
 
 builder.Services.AddCors(options => options.AddPolicy(CorsPolicyName, policy => policy
-    .WithOrigins(frontendOrigin, lanFrontendOrigin)
+    .WithOrigins(corsOrigins)
     .AllowAnyHeader()
     .AllowAnyMethod()
     .WithExposedHeaders("Retry-After")));
@@ -164,6 +179,8 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
+await ApplyDatabaseStartupAsync(app);
+
 app.UseForwardedHeaders();
 app.UseSerilogRequestLogging();
 
@@ -178,7 +195,10 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseHsts();
-    app.UseHttpsRedirection();
+    // Render (and other hosts) probe health over HTTP. TLS terminates at the proxy.
+    app.UseWhen(
+        context => !context.Request.Path.StartsWithSegments("/health"),
+        branch => branch.UseHttpsRedirection());
 }
 
 app.UseCors(CorsPolicyName);
@@ -188,13 +208,93 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = _ => false,
+    ResponseWriter = WriteHealthStatus,
+});
 app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
     Predicate = check => check.Tags.Contains("ready"),
+    ResponseWriter = WriteHealthStatus,
 });
 
 app.Run();
 
 static string ClientPartitionKey(HttpContext httpContext) =>
     httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+static string[] BuildCorsOrigins(FrontendOptions options, bool isDevelopment)
+{
+    var origins = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+    AddOrigin(origins, options.BaseUrl);
+
+    foreach (var extra in (options.AdditionalOrigins ?? string.Empty).Split(
+                 ',',
+                 StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    {
+        AddOrigin(origins, extra);
+    }
+
+    if (isDevelopment)
+    {
+        AddOrigin(origins, "http://localhost:4200");
+        AddOrigin(origins, "http://127.0.0.1:4200");
+        AddOrigin(origins, LanAddress.ReplaceLocalhostWithLan(options.BaseUrl.TrimEnd('/')));
+    }
+
+    return [.. origins];
+}
+
+static void AddOrigin(ISet<string> origins, string? value)
+{
+    if (string.IsNullOrWhiteSpace(value))
+    {
+        return;
+    }
+
+    origins.Add(value.Trim().TrimEnd('/'));
+}
+
+static void EnsureProductionFrontendOrigin(FrontendOptions options, bool isDevelopment)
+{
+    if (isDevelopment)
+    {
+        return;
+    }
+
+    if (!Uri.TryCreate(options.BaseUrl.Trim(), UriKind.Absolute, out var uri)
+        || uri.Scheme != Uri.UriSchemeHttps
+        || string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(uri.Host, "127.0.0.1", StringComparison.OrdinalIgnoreCase))
+    {
+        throw new InvalidOperationException(
+            "Frontend:BaseUrl must be the public HTTPS origin of the Angular app. Set Frontend__BaseUrl.");
+    }
+}
+
+static async Task ApplyDatabaseStartupAsync(WebApplication app)
+{
+    var configured = app.Configuration["Database:MigrateOnStartup"];
+    var migrate = bool.TryParse(configured, out var parsed)
+        ? parsed
+        : !app.Environment.IsDevelopment();
+
+    if (!migrate)
+    {
+        return;
+    }
+
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+}
+
+static Task WriteHealthStatus(HttpContext context, HealthReport report)
+{
+    context.Response.ContentType = "application/json; charset=utf-8";
+    return context.Response.WriteAsJsonAsync(
+        new { status = report.Status.ToString() },
+        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+}

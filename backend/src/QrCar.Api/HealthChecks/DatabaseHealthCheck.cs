@@ -6,10 +6,12 @@ namespace QrCar.Api.HealthChecks;
 public class DatabaseHealthCheck : IHealthCheck
 {
     private readonly AppDbContext _dbContext;
+    private readonly ILogger<DatabaseHealthCheck> _logger;
 
-    public DatabaseHealthCheck(AppDbContext dbContext)
+    public DatabaseHealthCheck(AppDbContext dbContext, ILogger<DatabaseHealthCheck> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<HealthCheckResult> CheckHealthAsync(
@@ -19,12 +21,13 @@ public class DatabaseHealthCheck : IHealthCheck
         try
         {
             return await _dbContext.Database.CanConnectAsync(cancellationToken)
-                ? HealthCheckResult.Healthy("Database reachable.")
+                ? HealthCheckResult.Healthy()
                 : HealthCheckResult.Unhealthy("Database is not reachable.");
         }
         catch (Exception exception)
         {
-            return HealthCheckResult.Unhealthy("Database check failed.", exception);
+            _logger.LogWarning(exception, "Database health check failed.");
+            return HealthCheckResult.Unhealthy("Database is not reachable.");
         }
     }
 }

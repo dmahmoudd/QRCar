@@ -12,4 +12,10 @@ public class FrontendOptions
 
     /// <summary>Path of the public scan page. "{token}" is substituted at render time.</summary>
     public string ScanPathTemplate { get; set; } = "/c/{token}";
+
+    /// <summary>
+    /// Extra browser origins allowed to call the API, comma-separated.
+    /// Production CORS is only BaseUrl plus this list — never every origin.
+    /// </summary>
+    public string AdditionalOrigins { get; set; } = string.Empty;
 }
