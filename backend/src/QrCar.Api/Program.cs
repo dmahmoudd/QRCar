@@ -24,6 +24,33 @@ using Serilog;
 
 const string CorsPolicyName = "AngularApp";
 
+try
+{
+    await RunAsync(args);
+}
+catch (Exception ex)
+{
+    // MonsterASP / IIS often only shows ERR_CONNECTION_RESET when startup throws.
+    // Write a file next to the DLL so WebFTP can show the real exception.
+    try
+    {
+        var errorPath = Path.Combine(AppContext.BaseDirectory, "startup-error.txt");
+        await File.WriteAllTextAsync(
+            errorPath,
+            $"{DateTimeOffset.UtcNow:O}{Environment.NewLine}{ex}");
+    }
+    catch
+    {
+        // Ignore secondary IO failures; rethrow the original cause.
+    }
+
+    throw;
+}
+
+return;
+
+static async Task RunAsync(string[] args)
+{
 var builder = WebApplication.CreateBuilder(args);
 
 // IIS / ANCM owns the listen address. Binding PORT ourselves breaks in-process IIS
@@ -225,7 +252,8 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
     ResponseWriter = WriteHealthStatus,
 });
 
-app.Run();
+await app.RunAsync();
+} // RunAsync
 
 static string ClientPartitionKey(HttpContext httpContext) =>
     httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
