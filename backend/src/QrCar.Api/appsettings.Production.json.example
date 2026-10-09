@@ -1,0 +1,21 @@
+{
+  "_comment": "Copy to the hosting Environment Variables UI (preferred) or to a local appsettings.Production.json that is NEVER committed. Nested keys use __ in env var names.",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=SQL????.monsterasp.net;Database=????;User Id=????;Password=????;Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
+  },
+  "Jwt": {
+    "Issuer": "QrCar.Api",
+    "Audience": "QrCar.Client",
+    "SigningKey": "REPLACE_WITH_48_PLUS_RANDOM_CHARS",
+    "AccessTokenMinutes": 60
+  },
+  "Security": {
+    "EncryptionKey": "REPLACE_WITH_BASE64_32_BYTES",
+    "IpHashKey": "REPLACE_WITH_BASE64_32_BYTES"
+  },
+  "Frontend": {
+    "BaseUrl": "https://qrcar.pages.dev",
+    "ScanPathTemplate": "/c/{token}",
+    "AdditionalOrigins": ""
+  }
+}

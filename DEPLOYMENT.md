@@ -203,3 +203,35 @@ Auth uses **JWT in localStorage**, not cookies. No extra cookie/SameSite setup.
 | Cannot decrypt phones / login fails after DB restore | Production keys differ from local. Use the Render keys with that database. |
 
 Suggested order: push → Azure SQL → Render (health checks) → Pages → set `Frontend__BaseUrl` if the Pages URL differed → test login and scan.
+
+---
+
+## 9. MonsterASP.NET / runasp.net (IIS) — why `ERR_CONNECTION_RESET` happens
+
+The Angular app currently calls **`https://qrcar.runasp.net/api/v1`** (`environment.production.ts`).
+
+`appsettings.json` ships with **empty** connection string, JWT key, and encryption keys, and `Frontend:BaseUrl` is still `http://localhost:4200`. On a public host those defaults make the API **crash during startup**. IIS then closes the socket → browser shows `ERR_CONNECTION_RESET` (and `/` never loads).
+
+### Required environment variables (Control Panel → Scripting → Environment variables)
+
+| Name | Value |
+|---|---|
+| `ASPNETCORE_ENVIRONMENT` | `Production` |
+| `ConnectionStrings__DefaultConnection` | MSSQL connection string from the hosting **Databases** panel |
+| `Jwt__SigningKey` | ≥ 32 random characters (new for production) |
+| `Security__EncryptionKey` | Base64 of **exactly 32** random bytes |
+| `Security__IpHashKey` | Base64 of **exactly 32** random bytes |
+| `Frontend__BaseUrl` | `https://qrcar.pages.dev` (https, no trailing slash) |
+
+Generate keys:
+
+```powershell
+cd "C:\QRcar app\qr-car-app"
+powershell -File .\scripts\generate-hosting-secrets.ps1
+```
+
+Then **Restart application**. Open `https://YOUR-API-HOST/health/live` — expect `{"status":"Healthy"}`.
+
+If the public API host is **not** `qrcar.runasp.net` (e.g. a `*.monsterasp.net` name), update `src/environments/environment.production.ts`, rebuild, and redeploy Cloudflare Pages.
+
+Enable **Logs → ASP.NET Core debug** if it still fails, and read the first exception (almost always missing connection string / keys / `Frontend:BaseUrl`).
