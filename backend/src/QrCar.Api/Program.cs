@@ -26,8 +26,14 @@ const string CorsPolicyName = "AngularApp";
 
 var builder = WebApplication.CreateBuilder(args);
 
+// IIS / ANCM owns the listen address. Binding PORT ourselves breaks in-process IIS
+// (MonsterASP.NET). Keep PORT only for container hosts such as Render.
+var hostedBehindIis = !string.IsNullOrEmpty(
+    Environment.GetEnvironmentVariable("ASPNETCORE_IIS_PHYSICAL_PATH"));
+
 var hostedPort = Environment.GetEnvironmentVariable("PORT");
-if (!string.IsNullOrWhiteSpace(hostedPort))
+
+if (!hostedBehindIis && !string.IsNullOrWhiteSpace(hostedPort))
 {
     builder.WebHost.UseUrls($"http://0.0.0.0:{hostedPort}");
 }
