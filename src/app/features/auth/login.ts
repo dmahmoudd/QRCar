@@ -105,6 +105,10 @@ import { extractErrorMessage } from '../../core/http/problem-details';
         Don't have an account?
         <a class="font-medium text-brand-600 hover:underline" routerLink="/register">Create one</a>
       </p>
+      <p class="mt-3 text-center text-sm text-slate-500">
+        Just need to contact a car owner?
+        <a class="font-medium text-brand-600 hover:underline" routerLink="/scan">Scan a QR code</a>
+      </p>
     </div>
   `,
 })

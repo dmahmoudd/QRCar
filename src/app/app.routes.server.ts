@@ -9,6 +9,7 @@ export const serverRoutes: ServerRoute[] = [
    */
   { path: 'c/:token', renderMode: RenderMode.Client },
   { path: 'r/:trackingRef', renderMode: RenderMode.Client },
+  { path: 'scan', renderMode: RenderMode.Client },
 
   { path: 'login', renderMode: RenderMode.Prerender },
   { path: 'register', renderMode: RenderMode.Prerender },

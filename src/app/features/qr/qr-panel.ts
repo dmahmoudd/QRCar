@@ -48,14 +48,14 @@ import { ConfirmDialog, ConfirmDialogData } from '../../shared/ui/confirm-dialog
           <div class="rounded-lg bg-rose-50 p-4 text-sm text-rose-900">{{ errorMessage() }}</div>
         } @else if (qr(); as code) {
           <div class="flex flex-col items-center gap-5">
-            <div class="rounded-2xl border border-slate-200 bg-white p-4">
+            <div class="rounded-full border border-slate-200 bg-[#fffaf3] p-3">
               @if (imageUrl()) {
                 <img
                   [src]="imageUrl()"
-                  alt="QR code for this car"
-                  class="h-56 w-56"
-                  width="224"
-                  height="224"
+                  alt="QR sticker for this car"
+                  class="h-72 w-72 object-contain"
+                  width="288"
+                  height="288"
                 />
               }
             </div>
@@ -165,7 +165,7 @@ export class QrPanel {
       return;
     }
 
-    this.carsApi.getQrImage(carId, 'Png', 512).subscribe({
+    this.carsApi.getQrImage(carId, 'Png', 768).subscribe({
       next: (blob) => {
         this.releaseImageUrl();
         this.imageUrl.set(URL.createObjectURL(blob));
@@ -221,7 +221,7 @@ export class QrPanel {
     <title>QR sticker ${plate}</title>
     <style>
       body { font-family: system-ui, sans-serif; text-align: center; padding: 32px; }
-      img { width: 320px; height: 320px; }
+      img { width: 360px; height: auto; }
       h1 { font-size: 18px; margin: 16px 0 4px; }
       p { font-size: 12px; color: #555; margin: 0; }
       .frame { display: inline-block; border: 2px solid #111; border-radius: 16px; padding: 20px; }

@@ -1,6 +1,6 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,7 +24,12 @@ import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (loading()) {
-      <div class="grid h-64 place-items-center"><mat-spinner diameter="40" /></div>
+      <div class="grid h-64 place-items-center text-center">
+        <div>
+          <mat-spinner class="mx-auto" diameter="40" />
+          <p class="mt-3 text-sm text-slate-500">Checking this code with Tala3ny…</p>
+        </div>
+      </div>
     } @else if (notFound()) {
       <mat-card>
         <mat-card-content class="!p-8 text-center">
@@ -47,16 +52,32 @@ import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
           <p class="mt-2 text-sm text-slate-500">The owner removed this QR code.</p>
         </mat-card-content>
       </mat-card>
+    } @else if (paused()) {
+      <mat-card>
+        <mat-card-content class="!p-8 text-center">
+          <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-amber-50">
+            <mat-icon class="!h-7 !w-7 !text-3xl text-amber-500">pause_circle</mat-icon>
+          </div>
+          <h1 class="text-lg font-semibold text-slate-900">This code is not accepting contact</h1>
+          <p class="mt-2 text-sm text-slate-500">
+            Tala3ny recognised the sticker, but the owner has paused it for now.
+          </p>
+        </mat-card-content>
+      </mat-card>
     } @else if (errorMessage() && !car()) {
       <div class="rounded-lg bg-rose-50 p-4 text-sm text-rose-900">{{ errorMessage() }}</div>
     } @else if (car(); as owner) {
       <mat-card class="mb-4">
         <mat-card-content class="!p-6 text-center">
           <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-brand-50">
-            <mat-icon class="text-brand-600">phone</mat-icon>
+            <mat-icon class="text-brand-600">verified</mat-icon>
           </div>
-          <h1 class="text-lg font-semibold text-slate-900">Contact the owner</h1>
-          <p class="mt-3 font-mono text-2xl tracking-wide text-slate-900">{{ owner.maskedPhone }}</p>
+          <h1 class="text-lg font-semibold text-slate-900">Recognised Tala3ny code</h1>
+          <p class="mt-2 text-xs text-slate-400">
+            Verified by the Tala3ny server. That does not prove this sticker is still on the
+            original car.
+          </p>
+          <p class="mt-4 font-mono text-2xl tracking-wide text-slate-900">{{ owner.maskedPhone }}</p>
           <p class="mt-2 text-xs text-slate-400">
             The full number stays hidden. Call or WhatsApp still works.
           </p>
@@ -119,6 +140,7 @@ export class ScanLanding {
   protected readonly errorMessage = signal('');
   protected readonly notFound = signal(false);
   protected readonly retired = signal(false);
+  protected readonly paused = signal(false);
 
   protected readonly callUrl = computed(() => this.publicApi.callUrl(this.token()));
 
@@ -137,7 +159,7 @@ export class ScanLanding {
     effect(() => {
       const token = this.token();
       if (token) {
-        this.load(token);
+        untracked(() => this.load(token));
       }
     });
   }
@@ -150,10 +172,12 @@ export class ScanLanding {
     }
     this.notFound.set(false);
     this.retired.set(false);
+    this.paused.set(false);
 
     this.publicApi.getCarByToken(token).subscribe({
       next: (car) => {
         this.car.set(car);
+        this.paused.set(!car.acceptsRequests);
         this.loading.set(false);
       },
       error: (error: unknown) => {
@@ -163,8 +187,10 @@ export class ScanLanding {
           this.retired.set(true);
         } else if (error instanceof HttpErrorResponse && error.status === 404) {
           this.notFound.set(true);
+        } else if (error instanceof HttpErrorResponse && error.status === 409) {
+          this.paused.set(true);
         } else {
-          this.errorMessage.set(extractErrorMessage(error, 'Could not load this code.'));
+          this.errorMessage.set(extractErrorMessage(error, 'Could not verify this code. Check your connection and try again.'));
         }
       },
     });

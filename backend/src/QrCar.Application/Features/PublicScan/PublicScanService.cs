@@ -175,6 +175,11 @@ public class PublicScanService : IPublicScanService
     {
         var token = publicToken.Trim();
 
+        if (!PublicTokenFormat.IsWellFormed(token))
+        {
+            throw new NotFoundException("This QR code is not recognised.");
+        }
+
         var car = await _db.Cars
             .IgnoreQueryFilters()
             .Include(c => c.User)

@@ -1,3 +1,5 @@
+import { OFFICIAL_TALA3NY_ORIGINS } from '../app/core/qr/tala3ny-qr-payload';
+
 export const environment = {
   production: true,
   /**
@@ -5,4 +7,5 @@ export const environment = {
    * forwards /api/v1 to the MonsterASP API, which does not have working TLS yet.
    */
   apiBaseUrl: '/api/v1',
+  scanAllowedOrigins: OFFICIAL_TALA3NY_ORIGINS,
 };

@@ -81,7 +81,9 @@ public static class DependencyInjection
         services.AddSingleton<IEncryptionService, AesGcmEncryptionService>();
         services.AddSingleton<IIpHasher, HmacIpHasher>();
         services.AddSingleton<ISecureTokenGenerator, SecureTokenGenerator>();
+#pragma warning disable CA1416
         services.AddSingleton<IQrCodeService, QrCodeService>();
+#pragma warning restore CA1416
         services.AddSingleton<IPublicUrlBuilder, PublicUrlBuilder>();
 
         return services;

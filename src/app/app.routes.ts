@@ -37,6 +37,17 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'scan',
+    loadComponent: () => import('./layouts/public-layout').then((m) => m.PublicLayout),
+    children: [
+      {
+        path: '',
+        title: 'Scan QR',
+        loadComponent: () => import('./features/scan/scan-page').then((m) => m.ScanPage),
+      },
+    ],
+  },
 
   {
     path: 'login',

@@ -21,6 +21,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { path: '/scan', label: 'Scan QR', icon: 'qr_code_scanner' },
   { path: '/dashboard', label: 'Dashboard', icon: 'space_dashboard' },
   { path: '/cars', label: 'My cars', icon: 'directions_car' },
   { path: '/requests', label: 'Requests', icon: 'notifications' },
