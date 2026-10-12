@@ -40,8 +40,8 @@
         [matMenuTriggerFor]="accountMenu"
         [attr.aria-label]="'nav.account' | t"
       >
-        <span class="shell-toolbar-user-name">{{ user()?.fullName }}</span>
         <mat-icon>account_circle</mat-icon>
+        <span class="shell-toolbar-user-name">{{ user()?.fullName }}</span>
       </button>
 
       <mat-menu #accountMenu="matMenu">
@@ -65,6 +65,7 @@
   <mat-sidenav-container class="shell-body bg-brand-50">
     <mat-sidenav
       class="shell-nav border-e border-brand-100"
+      position="start"
       [mode]="isHandset() ? 'over' : 'side'"
       [opened]="isHandset() ? drawerOpen() : true"
       (closedStart)="drawerOpen.set(false)"
@@ -77,7 +78,9 @@
             routerLinkActive="is-active"
             (click)="closeOnMobile()"
           >
-            <mat-icon class="shell-link-icon">{{ item.icon }}</mat-icon>
+            <span class="shell-link-icon-wrap" dir="ltr">
+              <mat-icon class="shell-link-icon" [fontIcon]="item.icon" aria-hidden="true" />
+            </span>
             <span class="shell-link-label">{{ item.labelKey | t }}</span>
             @if (item.path === '/requests' && pendingCount() > 0) {
               <span class="shell-link-count">{{ pendingCount() }}</span>

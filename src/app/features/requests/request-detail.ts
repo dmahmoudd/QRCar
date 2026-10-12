@@ -1,6 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
@@ -10,23 +8,20 @@ import { LocalDatePipe } from '../../core/i18n/local-date.pipe';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
   ParkingRequest,
+  ParkingRequestStatus,
   ParkingResponseType,
   RESPONSE_OPTIONS,
 } from '../../core/models/parking-request.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
-import { StatusChip } from '../../shared/ui/status-chip';
 
 @Component({
   selector: 'app-request-detail',
   imports: [
     RouterLink,
     LocalDatePipe,
-    MatCardModule,
-    MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    StatusChip,
     RelativeTimePipe,
     TranslatePipe,
   ],
@@ -85,6 +80,29 @@ export class RequestDetail {
 
   protected reasonLabel(request: ParkingRequest): string {
     return this.i18n.reason(request.reason, request.reasonLabel);
+  }
+
+  protected carTitle(request: ParkingRequest): string {
+    return request.carLabel?.trim() || this.i18n.t('common.qrCode');
+  }
+
+  protected statusLabel(status: ParkingRequestStatus): string {
+    return this.i18n.status(status);
+  }
+
+  protected statusClasses(status: ParkingRequestStatus): string {
+    switch (status) {
+      case 'Pending':
+        return 'bg-tertiary-fixed text-on-tertiary-fixed';
+      case 'Seen':
+        return 'bg-primary-container/20 text-on-primary-container';
+      case 'Acknowledged':
+        return 'bg-secondary-container text-on-secondary-container';
+      case 'Expired':
+        return 'bg-error-container text-on-error-container';
+      default:
+        return 'bg-surface-container text-on-surface-variant';
+    }
   }
 
   protected responseLabel(responseType: ParkingResponseType | null): string {

@@ -1,130 +1,144 @@
 <a
-  class="mb-4 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800"
+  class="mb-5 inline-flex items-center gap-1 text-sm font-semibold text-on-surface-variant hover:text-on-surface"
   routerLink="/requests"
 >
-  <mat-icon class="!h-5 !w-5 !text-xl">arrow_back</mat-icon>
-  {{ 'requests.all' | t }}
+  <span class="icon-slot icon-slot-sm rtl:rotate-180"><mat-icon>arrow_back</mat-icon></span>
+  <span>{{ 'requests.all' | t }}</span>
 </a>
 
 @if (loading()) {
   <div class="grid h-64 place-items-center"><mat-spinner diameter="40" /></div>
 } @else if (errorMessage()) {
-  <div class="rounded-lg bg-rose-50 p-4 text-sm text-rose-900">{{ errorMessage() }}</div>
+  <div class="rounded-lg bg-error-container p-4 text-sm text-on-error-container">{{ errorMessage() }}</div>
 } @else if (request(); as item) {
-  <div class="grid w-full max-w-4xl grid-cols-1 gap-4 md:gap-6 lg:grid-cols-5">
-    <mat-card class="min-w-0 lg:col-span-3">
-      <mat-card-content class="!p-4 md:!p-6">
+  <div class="mx-auto grid w-full max-w-5xl grid-cols-1 items-start gap-6 lg:grid-cols-12">
+    <article
+      class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-6 shadow-sm lg:col-span-8"
+      [class.shadow-lg]="isOpen(item)"
+    >
+      @if (item.status === 'Pending') {
+        <div class="absolute inset-y-0 start-0 w-1.5 bg-gradient-to-b from-primary-container to-tertiary"></div>
+      }
+
+      <div class="flex flex-col gap-5 ps-2">
         <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 class="text-xl font-semibold text-slate-900">{{ reasonLabel(item) }}</h1>
-            <p class="mt-1 text-sm text-slate-500">
-              {{ item.carLabel }} ·
-              <span class="font-mono">{{ item.carPlate }}</span>
-            </p>
+          <div class="flex items-start gap-4">
+            <div
+              class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-inverse-surface text-primary-container shadow-sm"
+            >
+              <span class="icon-slot"><mat-icon>qr_code_2</mat-icon></span>
+            </div>
+            <div>
+              <h1 class="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-on-surface">
+                {{ reasonLabel(item) }}
+              </h1>
+              <p class="mt-1 text-sm text-on-surface-variant">{{ carTitle(item) }}</p>
+            </div>
           </div>
-          <app-status-chip [status]="item.status" />
+          <span
+            class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase"
+            [class]="statusClasses(item.status)"
+          >
+            {{ statusLabel(item.status) }}
+          </span>
         </div>
 
         @if (item.message) {
-          <blockquote class="mt-5 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
-            "{{ item.message }}"
+          <blockquote class="rounded-xl bg-surface-container-low p-4 text-sm leading-6 text-on-surface">
+            “{{ item.message }}”
           </blockquote>
         }
 
-        <p class="mt-4 text-xs text-slate-400">
+        <p class="text-xs text-on-surface-variant">
           {{ 'requests.sent' | t }} {{ item.createdAtUtc | relativeTime }} ·
           {{ item.createdAtUtc | localDate: 'medium' }}
         </p>
 
         @if (isOpen(item)) {
-          <div class="mt-6 border-t border-slate-100 pt-5">
-            <p class="mb-3 text-sm font-medium text-slate-700">
-              {{ 'requests.replyPrompt' | t }}
-            </p>
+          <div class="border-t border-surface-container-highest pt-5">
+            <p class="mb-1 text-sm font-semibold text-on-surface">{{ 'requests.replyPrompt' | t }}</p>
+            <p class="mb-3 text-xs text-on-surface-variant">{{ 'requests.replyHint' | t }}</p>
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
               @for (option of responseOptions(); track option.value) {
                 <button
-                  mat-stroked-button
-                  class="w-full"
+                  type="button"
+                  class="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-surface-container-low px-4 text-sm font-semibold text-on-surface transition hover:bg-primary-fixed hover:text-on-primary-fixed disabled:opacity-50"
                   [disabled]="saving()"
                   (click)="respond(option.value)"
                 >
-                  <mat-icon>{{ option.icon }}</mat-icon>
-                  {{ option.label }}
+                  <span class="icon-slot icon-slot-sm"><mat-icon>{{ option.icon }}</mat-icon></span>
+                  <span>{{ option.label }}</span>
                 </button>
               }
             </div>
-            <p class="mt-3 text-xs text-slate-400">
-              {{ 'requests.replyHint' | t }}
-            </p>
           </div>
         } @else if (item.status === 'Acknowledged') {
-          <div class="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-5">
-            <p class="text-sm text-slate-600">
+          <div
+            class="flex flex-col gap-3 border-t border-surface-container-highest pt-5 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <p class="text-sm text-on-surface-variant">
               {{ 'requests.youReplied' | t }}
-              <span class="font-medium">{{ responseLabel(item.responseType) }}</span>
+              <span class="font-semibold text-on-surface">{{ responseLabel(item.responseType) }}</span>
               {{ item.respondedAtUtc | relativeTime }}.
             </p>
-            <span class="flex-1"></span>
-            <button mat-flat-button color="primary" [disabled]="saving()" (click)="resolve()">
-              <mat-icon>check</mat-icon>
-              {{ 'requests.markResolved' | t }}
+            <button
+              type="button"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-primary-container to-tertiary-container px-6 text-sm font-bold text-on-primary-container shadow-md disabled:opacity-50"
+              [disabled]="saving()"
+              (click)="resolve()"
+            >
+              <span class="icon-slot"><mat-icon>check</mat-icon></span>
+              <span>{{ 'requests.markResolved' | t }}</span>
             </button>
           </div>
         } @else {
-          <div class="mt-6 border-t border-slate-100 pt-5 text-sm text-slate-500">
+          <div class="border-t border-surface-container-highest pt-5 text-sm text-on-surface-variant">
             {{ 'requests.closed' | t: { status: statusShort(item.status) } }}
           </div>
         }
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </article>
 
-    <mat-card class="min-w-0 lg:col-span-2">
-      <mat-card-content class="!p-4 md:!p-6">
-        <h2 class="mb-4 text-sm font-semibold uppercase text-slate-400">
-          {{ 'requests.timeline' | t }}
-        </h2>
-
-        <ol class="space-y-4 text-sm">
+    <aside class="rounded-xl bg-surface-container-lowest p-6 shadow-sm lg:col-span-4">
+      <h2 class="mb-4 text-[10px] font-bold tracking-wider text-on-surface-variant uppercase">
+        {{ 'requests.timeline' | t }}
+      </h2>
+      <ol class="flex flex-col gap-4 text-sm">
+        <li class="flex gap-3">
+          <span class="icon-slot text-primary-container"><mat-icon>qr_code_scanner</mat-icon></span>
+          <div>
+            <p class="font-semibold text-on-surface">{{ 'requests.scannedSent' | t }}</p>
+            <p class="text-xs text-on-surface-variant">{{ item.createdAtUtc | localDate: 'short' }}</p>
+          </div>
+        </li>
+        @if (item.seenAtUtc) {
           <li class="flex gap-3">
-            <mat-icon class="!h-5 !w-5 !text-xl text-accent-600">qr_code_scanner</mat-icon>
+            <span class="icon-slot text-primary"><mat-icon>visibility</mat-icon></span>
             <div>
-              <p class="font-medium text-slate-800">{{ 'requests.scannedSent' | t }}</p>
-              <p class="text-xs text-slate-400">{{ item.createdAtUtc | localDate: 'short' }}</p>
+              <p class="font-semibold text-on-surface">{{ 'requests.youOpened' | t }}</p>
+              <p class="text-xs text-on-surface-variant">{{ item.seenAtUtc | localDate: 'short' }}</p>
             </div>
           </li>
-
-          @if (item.seenAtUtc) {
-            <li class="flex gap-3">
-              <mat-icon class="!h-5 !w-5 !text-xl text-sky-600">visibility</mat-icon>
-              <div>
-                <p class="font-medium text-slate-800">{{ 'requests.youOpened' | t }}</p>
-                <p class="text-xs text-slate-400">{{ item.seenAtUtc | localDate: 'short' }}</p>
-              </div>
-            </li>
-          }
-
-          @if (item.respondedAtUtc) {
-            <li class="flex gap-3">
-              <mat-icon class="!h-5 !w-5 !text-xl text-emerald-600">reply</mat-icon>
-              <div>
-                <p class="font-medium text-slate-800">
-                  {{ 'requests.youRepliedPrefix' | t }} {{ responseLabel(item.responseType) }}
-                </p>
-                <p class="text-xs text-slate-400">{{ item.respondedAtUtc | localDate: 'short' }}</p>
-              </div>
-            </li>
-          }
-
+        }
+        @if (item.respondedAtUtc) {
           <li class="flex gap-3">
-            <mat-icon class="!h-5 !w-5 !text-xl text-slate-400">hourglass_bottom</mat-icon>
+            <span class="icon-slot text-primary"><mat-icon>reply</mat-icon></span>
             <div>
-              <p class="font-medium text-slate-800">{{ 'requests.expires' | t }}</p>
-              <p class="text-xs text-slate-400">{{ item.expiresAtUtc | localDate: 'short' }}</p>
+              <p class="font-semibold text-on-surface">
+                {{ 'requests.youRepliedPrefix' | t }} {{ responseLabel(item.responseType) }}
+              </p>
+              <p class="text-xs text-on-surface-variant">{{ item.respondedAtUtc | localDate: 'short' }}</p>
             </div>
           </li>
-        </ol>
-      </mat-card-content>
-    </mat-card>
+        }
+        <li class="flex gap-3">
+          <span class="icon-slot text-on-surface-variant"><mat-icon>hourglass_bottom</mat-icon></span>
+          <div>
+            <p class="font-semibold text-on-surface">{{ 'requests.expires' | t }}</p>
+            <p class="text-xs text-on-surface-variant">{{ item.expiresAtUtc | localDate: 'short' }}</p>
+          </div>
+        </li>
+      </ol>
+    </aside>
   </div>
 }

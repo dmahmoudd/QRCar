@@ -1,77 +1,162 @@
-<app-page-header
-  [title]="'requests.title' | t"
-  [subtitle]="'requests.subtitle' | t"
-/>
-
-<div class="-mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-1">
-  @for (filter of filters; track filter.value) {
-    <button
-      type="button"
-      class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition"
-      [class]="
-        activeFilter() === filter.value
-          ? 'bg-brand-600 text-white'
-          : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'
-      "
-      (click)="setFilter(filter.value)"
+<div class="mx-auto flex w-full max-w-5xl flex-col gap-6">
+  <div class="flex flex-col gap-1">
+    <div class="flex items-center gap-2 text-[10px] font-bold tracking-wider text-primary uppercase">
+      <span class="icon-slot icon-slot-sm"><mat-icon>notifications_active</mat-icon></span>
+      <span>{{ 'requests.liveConsole' | t }}</span>
+    </div>
+    <h1
+      class="font-[family-name:var(--font-display)] text-[26px] leading-8 font-bold tracking-tight text-on-surface sm:text-[32px] sm:leading-10"
     >
-      {{ filter.labelKey | t }}
-    </button>
+      {{ 'requests.title' | t }}
+    </h1>
+    <p class="max-w-2xl text-sm leading-6 text-on-surface-variant">{{ 'requests.subtitle' | t }}</p>
+  </div>
+
+  <div class="flex gap-1 overflow-x-auto rounded-xl bg-surface-container-lowest p-1.5 shadow-sm">
+    @for (filter of filters; track filter.value) {
+      <button
+        type="button"
+        class="shrink-0 rounded-full px-4 py-2 text-xs font-semibold whitespace-nowrap transition"
+        [class]="
+          activeFilter() === filter.value
+            ? 'bg-inverse-surface text-inverse-on-surface shadow-sm'
+            : 'bg-transparent text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+        "
+        (click)="setFilter(filter.value)"
+      >
+        @if (filter.value === 'Pending') {
+          <span class="me-1.5 inline-block h-2 w-2 rounded-full bg-tertiary align-middle"></span>
+        }
+        {{ filter.labelKey | t }}
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="grid h-64 place-items-center"><mat-spinner diameter="40" /></div>
+  } @else if (errorMessage()) {
+    <div class="rounded-lg bg-error-container p-4 text-sm text-on-error-container">{{ errorMessage() }}</div>
+  } @else if (requests().length === 0) {
+    <div class="rounded-xl bg-surface-container-lowest p-8 shadow-sm">
+      <app-empty-state
+        icon="notifications_off"
+        [title]="(activeFilter() ? 'requests.emptyFiltered' : 'requests.empty') | t"
+        [description]="'requests.emptyHint' | t"
+      />
+    </div>
+  } @else {
+    <div class="flex flex-col gap-4">
+      @for (request of requests(); track request.id) {
+        <article
+          class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-5 shadow-sm transition hover:-translate-y-0.5"
+          [class.shadow-lg]="request.status === 'Pending'"
+        >
+          @if (request.status === 'Pending') {
+            <div
+              class="absolute inset-y-0 start-0 w-1.5 bg-gradient-to-b from-primary-container to-tertiary"
+            ></div>
+          } @else if (request.status === 'Seen') {
+            <div class="absolute inset-y-0 start-0 w-1 bg-primary-container"></div>
+          }
+
+          <div class="flex flex-col gap-4 ps-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <span
+                  class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase"
+                  [class]="statusClasses(request.status)"
+                >
+                  @if (request.status === 'Pending') {
+                    <span class="h-1.5 w-1.5 animate-ping rounded-full bg-tertiary"></span>
+                  }
+                  {{ statusLabel(request.status) }}
+                </span>
+                <span class="flex items-center gap-1 text-xs text-on-surface-variant">
+                  <span class="icon-slot icon-slot-sm"><mat-icon>schedule</mat-icon></span>
+                  <span [class.text-tertiary]="request.status === 'Pending'" [class.font-semibold]="request.status === 'Pending'">
+                    {{ request.createdAtUtc | relativeTime }}
+                  </span>
+                </span>
+              </div>
+              <span class="text-xs text-on-surface-variant">
+                {{ 'requests.expires' | t }} {{ request.expiresAtUtc | relativeTime }}
+              </span>
+            </div>
+
+            <div class="flex items-start gap-4">
+              <div
+                class="grid h-12 w-12 shrink-0 place-items-center rounded-xl shadow-sm"
+                [class]="
+                  request.status === 'Pending'
+                    ? 'bg-inverse-surface text-primary-container'
+                    : 'bg-surface-container text-on-surface'
+                "
+              >
+                <span class="icon-slot"><mat-icon>qr_code_2</mat-icon></span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h2 class="font-[family-name:var(--font-display)] text-lg font-semibold text-on-surface">
+                    {{ reasonLabel(request) }}
+                  </h2>
+                  <span class="rounded-full bg-surface-container px-2 py-0.5 text-[10px] font-bold text-on-surface-variant">
+                    {{ carTitle(request) }}
+                  </span>
+                </div>
+                @if (request.message) {
+                  <p class="mt-1 text-sm leading-6 text-on-surface">“{{ request.message }}”</p>
+                }
+              </div>
+            </div>
+
+            @if (isOpen(request)) {
+              <div class="flex flex-col gap-2">
+                <p class="text-[10px] font-bold tracking-wider text-on-surface-variant uppercase">
+                  {{ 'requests.quickReply' | t }}
+                </p>
+                <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  @for (option of responseOptions(); track option.value) {
+                    <button
+                      type="button"
+                      class="rounded-lg bg-surface-container-low px-3 py-2 text-center text-xs font-semibold text-on-surface transition hover:bg-primary-fixed hover:text-on-primary-fixed disabled:opacity-50"
+                      [disabled]="busyId() === request.id"
+                      (click)="respond(request, option.value)"
+                    >
+                      {{ option.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+            } @else if (request.status === 'Acknowledged') {
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <p class="text-sm text-on-surface-variant">
+                  {{ 'requests.youReplied' | t }}
+                  <span class="font-semibold text-on-surface">{{ responseLabel(request.responseType) }}</span>
+                </p>
+                <button
+                  type="button"
+                  class="inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-xs font-semibold text-secondary transition hover:bg-surface-container-low"
+                  [disabled]="busyId() === request.id"
+                  (click)="resolve(request)"
+                >
+                  <span class="icon-slot icon-slot-sm"><mat-icon>check_circle</mat-icon></span>
+                  <span>{{ 'requests.markResolved' | t }}</span>
+                </button>
+              </div>
+            }
+
+            <div class="flex justify-end">
+              <a
+                class="inline-flex items-center gap-1 text-xs font-semibold text-primary"
+                [routerLink]="['/requests', request.id]"
+              >
+                <span>{{ 'requests.open' | t }}</span>
+                <span class="icon-slot icon-slot-sm rtl:rotate-180"><mat-icon>chevron_right</mat-icon></span>
+              </a>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
   }
 </div>
-
-@if (loading()) {
-  <div class="grid h-64 place-items-center"><mat-spinner diameter="40" /></div>
-} @else if (errorMessage()) {
-  <div class="rounded-lg bg-rose-50 p-4 text-sm text-rose-900">{{ errorMessage() }}</div>
-} @else if (requests().length === 0) {
-  <mat-card>
-    <app-empty-state
-      icon="notifications_off"
-      [title]="(activeFilter() ? 'requests.emptyFiltered' : 'requests.empty') | t"
-      [description]="'requests.emptyHint' | t"
-    />
-  </mat-card>
-} @else {
-  <mat-card>
-    <ul class="divide-y divide-slate-100">
-      @for (request of requests(); track request.id) {
-        <li>
-          <a
-            class="flex items-start gap-3 px-4 py-3.5 transition hover:bg-slate-50 md:gap-4 md:px-5 md:py-4"
-            [routerLink]="['/requests', request.id]"
-          >
-            <div
-              class="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full"
-              [class]="
-                request.status === 'Pending'
-                  ? 'bg-amber-50 text-amber-600'
-                  : 'bg-slate-100 text-slate-500'
-              "
-            >
-              <mat-icon class="!h-5 !w-5 !text-xl">notifications</mat-icon>
-            </div>
-
-            <div class="min-w-0 flex-1">
-              <div class="flex flex-wrap items-center gap-2">
-                <p class="font-medium text-slate-900">{{ reasonLabel(request) }}</p>
-                <app-status-chip [status]="request.status" />
-              </div>
-              <p class="mt-0.5 text-sm text-slate-500">
-                {{ request.carLabel }} · {{ request.carPlate }} ·
-                {{ request.createdAtUtc | relativeTime }}
-              </p>
-              @if (request.message) {
-                <p class="mt-1 line-clamp-2-safe text-sm text-slate-600">
-                  "{{ request.message }}"
-                </p>
-              }
-            </div>
-
-            <mat-icon class="mt-1 shrink-0 text-slate-300">chevron_right</mat-icon>
-          </a>
-        </li>
-      }
-    </ul>
-  </mat-card>
-}

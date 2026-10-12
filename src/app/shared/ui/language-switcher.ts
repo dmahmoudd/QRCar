@@ -5,6 +5,13 @@ import { Locale } from '../../core/i18n/translations';
 @Component({
   selector: 'app-language-switcher',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    :host {
+      display: inline-flex;
+      align-items: center;
+      line-height: 0;
+    }
+  `,
   template: `
     @if (tone() === 'pills') {
       <div
@@ -38,19 +45,23 @@ import { Locale } from '../../core/i18n/translations';
         </button>
       </div>
     } @else if (tone() === 'dark') {
-      <div class="flex items-center gap-1 text-sm font-semibold" role="group" aria-label="Language">
+      <div
+        class="flex h-10 items-center gap-1 text-sm leading-none font-semibold"
+        role="group"
+        aria-label="Language"
+      >
         <button
           type="button"
-          class="rounded px-1.5 py-0.5 transition"
+          class="rounded px-1.5 leading-none transition"
           [class]="locale() === 'en' ? 'text-primary-container' : 'text-white/75 hover:text-white'"
           (click)="set('en')"
         >
           EN
         </button>
-        <span class="text-white/35">|</span>
+        <span class="leading-none text-white/35">|</span>
         <button
           type="button"
-          class="rounded px-1.5 py-0.5 transition"
+          class="rounded px-1.5 leading-none transition"
           [class]="locale() === 'ar' ? 'text-primary-container' : 'text-white/75 hover:text-white'"
           (click)="set('ar')"
         >
