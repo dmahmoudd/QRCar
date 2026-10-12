@@ -142,8 +142,10 @@ export class ScanPage {
       this.errorMessage.set(
         'This QR code is not a Tala3ny sticker, so Tala3ny cannot look it up or contact a car owner.',
       );
-      await this.stopScanning();
-      this.changeDetector.markForCheck();
+      this.scanning.set(false);
+      this.starting.set(false);
+      this.changeDetector.detectChanges();
+      await this.camera.stop();
       return;
     }
 

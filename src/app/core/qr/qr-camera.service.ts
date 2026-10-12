@@ -32,8 +32,9 @@ export class QrCameraService {
     const reader = new BrowserQRCodeReader();
 
     this.controls = await reader.decodeFromVideoDevice(undefined, video, (result) => {
-      if (result) {
-        onText(result.getText());
+      const text = result?.getText()?.trim();
+      if (text) {
+        onText(text);
       }
     });
   }

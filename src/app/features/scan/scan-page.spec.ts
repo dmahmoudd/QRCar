@@ -89,6 +89,17 @@ describe('ScanPage', () => {
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
+  it('rejects an Instagram QR without calling the API', async () => {
+    await page.onDecoded('https://www.instagram.com/qr?u=abc');
+    fixture.detectChanges();
+
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(camera.stop).toHaveBeenCalled();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'This is not a Tala3ny QR code',
+    );
+  });
+
   it('rejects an external QR without calling the API or navigating', async () => {
     await page.onDecoded(`https://evil.example/c/${TOKEN}`);
     fixture.detectChanges();
@@ -110,7 +121,7 @@ describe('ScanPage', () => {
       'This is not a Tala3ny QR code',
     );
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(
-      'cannot contact a car owner',
+      'cannot look this up or contact an owner',
     );
   });
 
