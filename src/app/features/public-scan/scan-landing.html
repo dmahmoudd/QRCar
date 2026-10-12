@@ -1,16 +1,14 @@
 <mat-card>
   <mat-card-content class="!p-5 text-center md:!p-8">
-    <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-brand-50">
-      <mat-icon class="!h-7 !w-7 !text-3xl text-brand-600">security</mat-icon>
+    <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-accent-50">
+      <mat-icon class="!h-7 !w-7 !text-3xl text-accent-600">security</mat-icon>
     </div>
-    <h1 class="text-lg font-semibold text-slate-900">Use the official Tala3ny scanner</h1>
+    <h1 class="text-lg font-semibold text-slate-900">{{ 'landing.title' | t }}</h1>
     <p class="mt-3 text-sm text-slate-500">
-      To verify this Tala3ny QR code and access contact options, use the official Tala3ny
-      scanner.
+      {{ 'landing.body' | t }}
     </p>
     <p class="mt-4 text-xs leading-5 text-slate-400">
-      Tala3ny verifies QR codes with its server. A recognized code alone does not prove that
-      the sticker is still attached to the original vehicle.
+      {{ 'landing.hint' | t }}
     </p>
 
     <a
@@ -20,10 +18,10 @@
       [routerLink]="scannerPath"
     >
       <mat-icon>qr_code_scanner</mat-icon>
-      Open Tala3ny Scanner
+      {{ 'landing.open' | t }}
     </a>
     <p class="mt-3 text-xs text-slate-400">
-      The camera starts only after you press Start scanning.
+      {{ 'landing.cameraHint' | t }}
     </p>
   </mat-card-content>
 </mat-card>

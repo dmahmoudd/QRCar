@@ -4,10 +4,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-scan-landing',
-  imports: [MatCardModule, MatButtonModule, MatIconModule, RouterLink],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './scan-landing.html',
 })

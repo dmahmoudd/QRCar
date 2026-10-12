@@ -1,14 +1,14 @@
 <div class="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-4 py-6">
+  <div class="mb-4 flex justify-end">
+    <app-language-switcher />
+  </div>
+
   <div class="mb-6 text-center">
-    <div
-      class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-brand-600 text-white"
-    >
-      <mat-icon class="!h-8 !w-8 !text-3xl">qr_code_2</mat-icon>
+    <div class="mx-auto mb-4 flex justify-center">
+      <app-brand-logo fullClass="h-24 w-24 object-contain" />
     </div>
-    <h1 class="text-2xl font-semibold text-slate-900">Create your account</h1>
-    <p class="mt-1 text-sm text-slate-500">
-      People who scan your code can contact you without seeing your full number.
-    </p>
+    <h1 class="text-2xl font-semibold text-slate-900">{{ 'register.title' | t }}</h1>
+    <p class="mt-1 text-sm text-slate-500">{{ 'register.subtitle' | t }}</p>
   </div>
 
   <mat-card class="p-2">
@@ -26,32 +26,32 @@
 
       <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-2">
         <mat-form-field appearance="outline">
-          <mat-label>Full name</mat-label>
+          <mat-label>{{ 'register.fullName' | t }}</mat-label>
           <input matInput formControlName="fullName" autocomplete="name" />
           @if (form.controls.fullName.touched && form.controls.fullName.invalid) {
-            <mat-error>Please tell us your name.</mat-error>
+            <mat-error>{{ 'register.nameRequired' | t }}</mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
+          <mat-label>{{ 'register.email' | t }}</mat-label>
           <input matInput type="email" formControlName="email" autocomplete="email" />
           @if (form.controls.email.touched && form.controls.email.invalid) {
-            <mat-error>Enter a valid email address.</mat-error>
+            <mat-error>{{ 'register.emailInvalid' | t }}</mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Phone number</mat-label>
+          <mat-label>{{ 'register.phone' | t }}</mat-label>
           <input matInput formControlName="phoneNumber" placeholder="+905551112233" />
-          <mat-hint>Include the country code. Kept private and encrypted.</mat-hint>
+          <mat-hint>{{ 'register.phoneHint' | t }}</mat-hint>
           @if (form.controls.phoneNumber.touched && form.controls.phoneNumber.invalid) {
-            <mat-error>Use international format, for example +905551112233.</mat-error>
+            <mat-error>{{ 'register.phoneInvalid' | t }}</mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Password</mat-label>
+          <mat-label>{{ 'register.password' | t }}</mat-label>
           <input
             matInput
             [type]="showPassword() ? 'text' : 'password'"
@@ -62,16 +62,14 @@
             mat-icon-button
             matSuffix
             type="button"
-            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            [attr.aria-label]="showPassword() ? ('login.hidePassword' | t) : ('login.showPassword' | t)"
             (click)="showPassword.set(!showPassword())"
           >
             <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
-          <mat-hint>At least 8 characters, with a letter and a digit.</mat-hint>
+          <mat-hint>{{ 'register.passwordHint' | t }}</mat-hint>
           @if (form.controls.password.touched && form.controls.password.invalid) {
-            <mat-error>
-              Needs 8+ characters including at least one letter and one digit.
-            </mat-error>
+            <mat-error>{{ 'register.passwordInvalid' | t }}</mat-error>
           }
         </mat-form-field>
 
@@ -82,14 +80,16 @@
           type="submit"
           [disabled]="loading()"
         >
-          {{ loading() ? 'Creating account…' : 'Create account' }}
+          {{ loading() ? ('register.submitting' | t) : ('register.submit' | t) }}
         </button>
       </form>
     </mat-card-content>
   </mat-card>
 
   <p class="mt-6 text-center text-sm text-slate-500">
-    Already registered?
-    <a class="font-medium text-brand-600 hover:underline" routerLink="/login">Sign in</a>
+    {{ 'register.hasAccount' | t }}
+    <a class="font-medium text-brand-600 hover:underline" routerLink="/login">{{
+      'register.signIn' | t
+    }}</a>
   </p>
 </div>

@@ -1,19 +1,12 @@
 <app-page-header
-  [title]="isEdit() ? 'Edit QR code' : 'Create a QR code'"
-  [subtitle]="
-    isEdit()
-      ? 'This sticker shows your phone number to anyone who scans it.'
-      : 'Print the code and put it where someone can scan it. They will see your number.'
-  "
+  [title]="(isEdit() ? 'cars.editTitle' : 'cars.createTitle') | t"
+  [subtitle]="(isEdit() ? 'cars.editSubtitle' : 'cars.createSubtitle') | t"
 />
 
 @if (welcome() && !isEdit()) {
   <div class="mb-6 flex items-start gap-3 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-900">
     <mat-icon class="!h-5 !w-5 !text-xl">check_circle</mat-icon>
-    <span>
-      Account created. Create a QR code now. Scanners can call you without seeing the full
-      number.
-    </span>
+    <span>{{ 'cars.welcomeBanner' | t }}</span>
   </div>
 }
 
@@ -31,16 +24,16 @@
 
       <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-2">
         <mat-form-field appearance="outline">
-          <mat-label>Label (optional)</mat-label>
-          <input matInput formControlName="nickname" placeholder="Windscreen, bag, keys…" />
-          <mat-hint>Only you see this. Helps if you print more than one code.</mat-hint>
+          <mat-label>{{ 'cars.label' | t }}</mat-label>
+          <input matInput formControlName="nickname" [placeholder]="'cars.labelPlaceholder' | t" />
+          <mat-hint>{{ 'cars.labelHint' | t }}</mat-hint>
         </mat-form-field>
 
         @if (isEdit()) {
           <div class="mt-2 rounded-lg bg-slate-50 p-4">
-            <mat-slide-toggle formControlName="isActive">Code is active</mat-slide-toggle>
+            <mat-slide-toggle formControlName="isActive">{{ 'cars.codeActive' | t }}</mat-slide-toggle>
             <p class="mt-1 text-xs text-slate-500">
-              When off, the sticker no longer shows your number as a live contact.
+              {{ 'cars.codeActiveHint' | t }}
             </p>
           </div>
         }
@@ -53,7 +46,7 @@
             type="submit"
             [disabled]="saving()"
           >
-            {{ saving() ? 'Saving…' : isEdit() ? 'Save' : 'Create QR code' }}
+            {{ saving() ? ('common.saving' | t) : isEdit() ? ('common.save' | t) : ('cars.createSubmit' | t) }}
           </button>
           <button
             mat-stroked-button
@@ -61,7 +54,7 @@
             type="button"
             (click)="cancel()"
           >
-            Cancel
+            {{ 'common.cancel' | t }}
           </button>
         </div>
       </form>

@@ -3,7 +3,7 @@
   routerLink="/requests"
 >
   <mat-icon class="!h-5 !w-5 !text-xl">arrow_back</mat-icon>
-  All requests
+  {{ 'requests.all' | t }}
 </a>
 
 @if (loading()) {
@@ -16,7 +16,7 @@
       <mat-card-content class="!p-4 md:!p-6">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 class="text-xl font-semibold text-slate-900">{{ item.reasonLabel }}</h1>
+            <h1 class="text-xl font-semibold text-slate-900">{{ reasonLabel(item) }}</h1>
             <p class="mt-1 text-sm text-slate-500">
               {{ item.carLabel }} ·
               <span class="font-mono">{{ item.carPlate }}</span>
@@ -32,17 +32,17 @@
         }
 
         <p class="mt-4 text-xs text-slate-400">
-          Sent {{ item.createdAtUtc | relativeTime }} ·
-          {{ item.createdAtUtc | date: 'medium' }}
+          {{ 'requests.sent' | t }} {{ item.createdAtUtc | relativeTime }} ·
+          {{ item.createdAtUtc | localDate: 'medium' }}
         </p>
 
         @if (isOpen(item)) {
           <div class="mt-6 border-t border-slate-100 pt-5">
             <p class="mb-3 text-sm font-medium text-slate-700">
-              Let them know what you're doing
+              {{ 'requests.replyPrompt' | t }}
             </p>
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              @for (option of responseOptions; track option.value) {
+              @for (option of responseOptions(); track option.value) {
                 <button
                   mat-stroked-button
                   class="w-full"
@@ -55,26 +55,25 @@
               }
             </div>
             <p class="mt-3 text-xs text-slate-400">
-              They see your reply on the page they used to contact you. Your number is not
-              shared.
+              {{ 'requests.replyHint' | t }}
             </p>
           </div>
         } @else if (item.status === 'Acknowledged') {
           <div class="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-5">
             <p class="text-sm text-slate-600">
-              You replied
+              {{ 'requests.youReplied' | t }}
               <span class="font-medium">{{ responseLabel(item.responseType) }}</span>
               {{ item.respondedAtUtc | relativeTime }}.
             </p>
             <span class="flex-1"></span>
             <button mat-flat-button color="primary" [disabled]="saving()" (click)="resolve()">
               <mat-icon>check</mat-icon>
-              Mark resolved
+              {{ 'requests.markResolved' | t }}
             </button>
           </div>
         } @else {
           <div class="mt-6 border-t border-slate-100 pt-5 text-sm text-slate-500">
-            This request is {{ item.status.toLowerCase() }} and no longer needs an answer.
+            {{ 'requests.closed' | t: { status: statusShort(item.status) } }}
           </div>
         }
       </mat-card-content>
@@ -83,15 +82,15 @@
     <mat-card class="min-w-0 lg:col-span-2">
       <mat-card-content class="!p-4 md:!p-6">
         <h2 class="mb-4 text-sm font-semibold uppercase text-slate-400">
-          Timeline
+          {{ 'requests.timeline' | t }}
         </h2>
 
         <ol class="space-y-4 text-sm">
           <li class="flex gap-3">
-            <mat-icon class="!h-5 !w-5 !text-xl text-brand-600">qr_code_scanner</mat-icon>
+            <mat-icon class="!h-5 !w-5 !text-xl text-accent-600">qr_code_scanner</mat-icon>
             <div>
-              <p class="font-medium text-slate-800">Scanned and sent</p>
-              <p class="text-xs text-slate-400">{{ item.createdAtUtc | date: 'short' }}</p>
+              <p class="font-medium text-slate-800">{{ 'requests.scannedSent' | t }}</p>
+              <p class="text-xs text-slate-400">{{ item.createdAtUtc | localDate: 'short' }}</p>
             </div>
           </li>
 
@@ -99,8 +98,8 @@
             <li class="flex gap-3">
               <mat-icon class="!h-5 !w-5 !text-xl text-sky-600">visibility</mat-icon>
               <div>
-                <p class="font-medium text-slate-800">You opened it</p>
-                <p class="text-xs text-slate-400">{{ item.seenAtUtc | date: 'short' }}</p>
+                <p class="font-medium text-slate-800">{{ 'requests.youOpened' | t }}</p>
+                <p class="text-xs text-slate-400">{{ item.seenAtUtc | localDate: 'short' }}</p>
               </div>
             </li>
           }
@@ -110,9 +109,9 @@
               <mat-icon class="!h-5 !w-5 !text-xl text-emerald-600">reply</mat-icon>
               <div>
                 <p class="font-medium text-slate-800">
-                  You replied: {{ responseLabel(item.responseType) }}
+                  {{ 'requests.youRepliedPrefix' | t }} {{ responseLabel(item.responseType) }}
                 </p>
-                <p class="text-xs text-slate-400">{{ item.respondedAtUtc | date: 'short' }}</p>
+                <p class="text-xs text-slate-400">{{ item.respondedAtUtc | localDate: 'short' }}</p>
               </div>
             </li>
           }
@@ -120,8 +119,8 @@
           <li class="flex gap-3">
             <mat-icon class="!h-5 !w-5 !text-xl text-slate-400">hourglass_bottom</mat-icon>
             <div>
-              <p class="font-medium text-slate-800">Expires</p>
-              <p class="text-xs text-slate-400">{{ item.expiresAtUtc | date: 'short' }}</p>
+              <p class="font-medium text-slate-800">{{ 'requests.expires' | t }}</p>
+              <p class="text-xs text-slate-400">{{ item.expiresAtUtc | localDate: 'short' }}</p>
             </div>
           </li>
         </ol>

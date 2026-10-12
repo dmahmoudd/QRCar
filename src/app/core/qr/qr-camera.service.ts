@@ -39,10 +39,45 @@ export class QrCameraService {
     });
   }
 
+  canTorch(): boolean {
+    return !!this.torchTrack();
+  }
+
+  async setTorch(on: boolean): Promise<boolean> {
+    const track = this.torchTrack();
+    if (!track) {
+      return false;
+    }
+
+    try {
+      await track.applyConstraints({
+        advanced: [{ torch: on } as unknown as MediaTrackConstraintSet],
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async stop(): Promise<void> {
     this.controls?.stop();
     this.controls = null;
     this.releaseVideo();
+  }
+
+  private torchTrack(): MediaStreamTrack | null {
+    const stream = this.video?.srcObject;
+    if (!(stream instanceof MediaStream)) {
+      return null;
+    }
+
+    const track = stream.getVideoTracks()[0];
+    if (!track) {
+      return null;
+    }
+
+    const capabilities = track.getCapabilities?.() as MediaTrackCapabilities & { torch?: boolean };
+    return capabilities?.torch ? track : null;
   }
 
   private releaseVideo(): void {

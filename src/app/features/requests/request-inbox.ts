@@ -5,19 +5,20 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { ParkingRequestsApiService } from '../../core/api/parking-requests-api.service';
-import { extractErrorMessage } from '../../core/http/problem-details';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { ParkingRequest, ParkingRequestStatus } from '../../core/models/parking-request.models';
 import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
 import { EmptyState } from '../../shared/ui/empty-state';
 import { PageHeader } from '../../shared/ui/page-header';
 import { StatusChip } from '../../shared/ui/status-chip';
 
-const FILTERS: ReadonlyArray<{ label: string; value: ParkingRequestStatus | '' }> = [
-  { label: 'All', value: '' },
-  { label: 'Waiting', value: 'Pending' },
-  { label: 'Seen', value: 'Seen' },
-  { label: 'Replied', value: 'Acknowledged' },
-  { label: 'Resolved', value: 'Resolved' },
+const FILTERS: ReadonlyArray<{ labelKey: string; value: ParkingRequestStatus | '' }> = [
+  { labelKey: 'requests.filterAll', value: '' },
+  { labelKey: 'requests.filterWaiting', value: 'Pending' },
+  { labelKey: 'requests.filterSeen', value: 'Seen' },
+  { labelKey: 'requests.filterReplied', value: 'Acknowledged' },
+  { labelKey: 'requests.filterResolved', value: 'Resolved' },
 ];
 
 @Component({
@@ -32,6 +33,7 @@ const FILTERS: ReadonlyArray<{ label: string; value: ParkingRequestStatus | '' }
     EmptyState,
     StatusChip,
     RelativeTimePipe,
+    TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './request-inbox.html',
@@ -41,6 +43,7 @@ export class RequestInbox {
   readonly carId = input<string>('');
 
   private readonly requestsApi = inject(ParkingRequestsApiService);
+  private readonly i18n = inject(I18nService);
 
   protected readonly filters = FILTERS;
   protected readonly requests = signal<ParkingRequest[]>([]);
@@ -59,6 +62,10 @@ export class RequestInbox {
 
   protected setFilter(status: ParkingRequestStatus | ''): void {
     this.activeFilter.set(status);
+  }
+
+  protected reasonLabel(request: ParkingRequest): string {
+    return this.i18n.reason(request.reason, request.reasonLabel);
   }
 
   private load(status: ParkingRequestStatus | '', carId: string): void {
@@ -81,7 +88,7 @@ export class RequestInbox {
         },
         error: (error: unknown) => {
           this.loading.set(false);
-          this.errorMessage.set(extractErrorMessage(error, 'Could not load your requests.'));
+          this.errorMessage.set(this.i18n.httpError(error, 'requests.loadFailed'));
         },
       });
   }

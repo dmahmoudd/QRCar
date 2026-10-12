@@ -4,13 +4,13 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end" class="!flex-wrap">
   <button mat-button (click)="dialogRef.close(false)">
-    {{ data.cancelLabel ?? 'Cancel' }}
+    {{ data.cancelLabel ?? ('common.cancel' | t) }}
   </button>
   <button
     mat-flat-button
     [color]="data.destructive ? 'warn' : 'primary'"
     (click)="dialogRef.close(true)"
   >
-    {{ data.confirmLabel ?? 'Confirm' }}
+    {{ data.confirmLabel ?? ('common.confirm' | t) }}
   </button>
 </mat-dialog-actions>

@@ -19,7 +19,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        title: 'Open Tala3ny Scanner',
+        title: 'routes.scanLanding',
         loadComponent: () =>
           import('./features/public-scan/scan-landing').then((m) => m.ScanLanding),
       },
@@ -31,7 +31,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        title: 'Your request',
+        title: 'routes.requestStatus',
         loadComponent: () =>
           import('./features/public-scan/request-status').then((m) => m.RequestStatus),
       },
@@ -43,7 +43,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        title: 'Scan QR',
+        title: 'routes.scan',
         loadComponent: () => import('./features/scan/scan-page').then((m) => m.ScanPage),
       },
     ],
@@ -51,13 +51,13 @@ export const routes: Routes = [
 
   {
     path: 'login',
-    title: 'Sign in',
+    title: 'routes.login',
     canActivate: [guestGuard],
     loadComponent: () => import('./features/auth/login').then((m) => m.Login),
   },
   {
     path: 'register',
-    title: 'Create an account',
+    title: 'routes.register',
     canActivate: [guestGuard],
     loadComponent: () => import('./features/auth/register').then((m) => m.Register),
   },
@@ -67,50 +67,46 @@ export const routes: Routes = [
     loadComponent: () => import('./layouts/app-shell').then((m) => m.AppShell),
     canActivate: [authGuard],
     children: [
-      {
-        path: 'dashboard',
-        title: 'Dashboard',
-        loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),
-      },
+      { path: 'dashboard', redirectTo: 'cars', pathMatch: 'full' },
       {
         path: 'cars',
-        title: 'My cars',
+        title: 'routes.cars',
         loadComponent: () => import('./features/cars/car-list').then((m) => m.CarList),
       },
       {
         path: 'cars/new',
-        title: 'Add a car',
+        title: 'routes.carNew',
         loadComponent: () => import('./features/cars/car-form').then((m) => m.CarForm),
       },
       {
         path: 'cars/:carId',
-        title: 'Car',
+        title: 'routes.car',
         loadComponent: () => import('./features/cars/car-detail').then((m) => m.CarDetail),
       },
       {
         path: 'cars/:carId/edit',
-        title: 'Edit car',
+        title: 'routes.carEdit',
         loadComponent: () => import('./features/cars/car-form').then((m) => m.CarForm),
       },
       {
         path: 'requests',
-        title: 'Requests',
+        title: 'routes.requests',
         loadComponent: () =>
           import('./features/requests/request-inbox').then((m) => m.RequestInbox),
       },
       {
         path: 'requests/:requestId',
-        title: 'Request',
+        title: 'routes.request',
         loadComponent: () =>
           import('./features/requests/request-detail').then((m) => m.RequestDetail),
       },
       {
         path: 'profile',
-        title: 'Profile',
+        title: 'routes.profile',
         loadComponent: () => import('./features/profile/profile').then((m) => m.Profile),
       },
     ],
   },
 
-  { path: '**', redirectTo: 'dashboard' },
+  { path: '**', redirectTo: 'cars' },
 ];

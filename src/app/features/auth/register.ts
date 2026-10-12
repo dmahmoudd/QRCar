@@ -8,7 +8,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-import { extractErrorMessage } from '../../core/http/problem-details';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { BrandLogo } from '../../shared/ui/brand-logo';
+import { LanguageSwitcher } from '../../shared/ui/language-switcher';
 
 /** Mirrors the API's E.164 rule so the user is told before a round trip. */
 const E164_PATTERN = /^\+[1-9]\d{7,14}$/;
@@ -24,6 +27,9 @@ const E164_PATTERN = /^\+[1-9]\d{7,14}$/;
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
+    TranslatePipe,
+    LanguageSwitcher,
+    BrandLogo,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { ngSkipHydration: 'true' },
@@ -33,6 +39,7 @@ export class Register {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly i18n = inject(I18nService);
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal('');
@@ -65,7 +72,7 @@ export class Register {
       next: () => void this.router.navigate(['/cars/new'], { queryParams: { welcome: '1' } }),
       error: (error: unknown) => {
         this.loading.set(false);
-        this.errorMessage.set(extractErrorMessage(error, 'Could not create your account.'));
+        this.errorMessage.set(this.i18n.httpError(error, 'register.failed'));
       },
     });
   }

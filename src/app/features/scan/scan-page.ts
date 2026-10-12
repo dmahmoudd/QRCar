@@ -11,30 +11,48 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PublicScanApiService } from '../../core/api/public-scan-api.service';
-import { extractErrorMessage } from '../../core/http/problem-details';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { OfficialScan } from '../../core/models/public-scan.models';
 import { QrCameraService } from '../../core/qr/qr-camera.service';
 import { parseTala3nyQrPayload } from '../../core/qr/tala3ny-qr-payload';
+import { LanguageSwitcher } from '../../shared/ui/language-switcher';
 import { ScanResult } from './scan-result';
 
 @Component({
   selector: 'app-scan-page',
-  imports: [MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, ScanResult],
+  imports: [MatIconModule, MatProgressSpinnerModule, ScanResult, TranslatePipe, LanguageSwitcher],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './scan-page.html',
+  styles: `
+    .scan-laser {
+      background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+      box-shadow: 0 0 16px #f59e0b;
+      animation: scan-laser 2.5s ease-in-out infinite;
+    }
+
+    @keyframes scan-laser {
+      0%,
+      100% {
+        top: 12%;
+      }
+      50% {
+        top: 82%;
+      }
+    }
+  `,
 })
 export class ScanPage {
   private readonly camera = inject(QrCameraService);
   private readonly publicApi = inject(PublicScanApiService);
   private readonly changeDetector = inject(ChangeDetectorRef);
   private readonly zone = inject(NgZone);
+  private readonly i18n = inject(I18nService);
 
   private readonly preview = viewChild<ElementRef<HTMLVideoElement>>('preview');
 
@@ -47,6 +65,8 @@ export class ScanPage {
   protected readonly notFound = signal(false);
   protected readonly retired = signal(false);
   protected readonly paused = signal(false);
+  protected readonly torchOn = signal(false);
+  protected readonly torchAvailable = signal(false);
 
   private processedToken: string | null = null;
   private verifyingToken = false;
@@ -64,8 +84,7 @@ export class ScanPage {
         this.unrecognized() ||
         this.notFound() ||
         this.retired() ||
-        this.paused() ||
-        this.errorMessage()
+        this.paused()
       ),
   );
 
@@ -77,21 +96,21 @@ export class ScanPage {
     this.verifyingToken = false;
 
     if (!this.camera.isSupported()) {
-      this.errorMessage.set(
-        'This browser cannot use the camera. Open Tala3ny in Chrome or Safari on your phone.',
-      );
+      this.errorMessage.set(this.i18n.t('scan.noCamera'));
       return;
     }
 
     this.scanning.set(true);
     this.starting.set(true);
+    this.torchOn.set(false);
+    this.torchAvailable.set(false);
     this.changeDetector.detectChanges();
 
     const video = this.preview()?.nativeElement;
     if (!video) {
       this.scanning.set(false);
       this.starting.set(false);
-      this.errorMessage.set('Could not start the camera.');
+      this.errorMessage.set(this.i18n.t('scan.cameraFailed'));
       return;
     }
 
@@ -102,10 +121,11 @@ export class ScanPage {
         });
       });
       this.starting.set(false);
+      this.torchAvailable.set(this.camera.canTorch());
     } catch (error: unknown) {
       this.scanning.set(false);
       this.starting.set(false);
-      this.errorMessage.set(cameraErrorMessage(error));
+      this.errorMessage.set(this.cameraErrorMessage(error));
       await this.camera.stop();
     }
   }
@@ -113,7 +133,15 @@ export class ScanPage {
   async stopScanning(): Promise<void> {
     this.scanning.set(false);
     this.starting.set(false);
+    this.torchOn.set(false);
+    this.torchAvailable.set(false);
     await this.camera.stop();
+  }
+
+  async toggleTorch(): Promise<void> {
+    const next = !this.torchOn();
+    const applied = await this.camera.setTorch(next);
+    this.torchOn.set(applied && next);
   }
 
   resetResult(): void {
@@ -139,9 +167,7 @@ export class ScanPage {
 
       this.processedToken = rejectedKey;
       this.unrecognized.set(true);
-      this.errorMessage.set(
-        'This QR code is not a Tala3ny sticker, so Tala3ny cannot look it up or contact a car owner.',
-      );
+      this.errorMessage.set(this.i18n.t('scan.unrecognized'));
       this.scanning.set(false);
       this.starting.set(false);
       this.changeDetector.detectChanges();
@@ -170,13 +196,11 @@ export class ScanPage {
         this.retired.set(true);
       } else if (error instanceof HttpErrorResponse && error.status === 404) {
         this.notFound.set(true);
-        this.errorMessage.set('This code is not in the Tala3ny system.');
+        this.errorMessage.set(this.i18n.t('scan.notInSystem'));
       } else if (error instanceof HttpErrorResponse && error.status === 409) {
         this.paused.set(true);
       } else {
-        this.errorMessage.set(
-          extractErrorMessage(error, 'Could not verify this code. Check your connection and try again.'),
-        );
+        this.errorMessage.set(this.i18n.httpError(error, 'scan.verifyFailed'));
       }
     } finally {
       this.verifying.set(false);
@@ -184,30 +208,30 @@ export class ScanPage {
       this.changeDetector.markForCheck();
     }
   }
-}
 
-function cameraErrorMessage(error: unknown): string {
-  const name = error instanceof DOMException ? error.name : '';
+  private cameraErrorMessage(error: unknown): string {
+    const name = error instanceof DOMException ? error.name : '';
 
-  if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-    return 'Camera permission was denied. Allow the camera to scan a Tala3ny QR code.';
+    if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+      return this.i18n.t('scan.permissionDenied');
+    }
+
+    if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+      return this.i18n.t('scan.noDevice');
+    }
+
+    if (name === 'NotReadableError') {
+      return this.i18n.t('scan.inUse');
+    }
+
+    if (name === 'SecurityError') {
+      return this.i18n.t('scan.needHttps');
+    }
+
+    if (name === 'NotSupportedError') {
+      return this.i18n.t('scan.noCamera');
+    }
+
+    return this.i18n.t('scan.cameraFailed');
   }
-
-  if (name === 'NotFoundError' || name === 'OverconstrainedError') {
-    return 'No camera was found on this device.';
-  }
-
-  if (name === 'NotReadableError') {
-    return 'The camera is already in use by another app.';
-  }
-
-  if (name === 'SecurityError') {
-    return 'Camera access needs a secure connection (HTTPS).';
-  }
-
-  if (name === 'NotSupportedError') {
-    return 'This browser cannot use the camera. Open Tala3ny in Chrome or Safari on your phone.';
-  }
-
-  return 'Could not start the camera.';
 }

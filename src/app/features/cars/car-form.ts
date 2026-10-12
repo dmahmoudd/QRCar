@@ -9,7 +9,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Router } from '@angular/router';
 import { CarsApiService } from '../../core/api/cars-api.service';
-import { extractErrorMessage } from '../../core/http/problem-details';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { NotificationService } from '../../core/services/notification.service';
 import { PageHeader } from '../../shared/ui/page-header';
 
@@ -25,6 +26,7 @@ import { PageHeader } from '../../shared/ui/page-header';
     MatSlideToggleModule,
     MatProgressSpinnerModule,
     PageHeader,
+    TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './car-form.html',
@@ -37,6 +39,7 @@ export class CarForm {
   private readonly router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
   private readonly notifications = inject(NotificationService);
+  private readonly i18n = inject(I18nService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -72,7 +75,7 @@ export class CarForm {
       },
       error: (error: unknown) => {
         this.loading.set(false);
-        this.errorMessage.set(extractErrorMessage(error, 'Could not load this QR code.'));
+        this.errorMessage.set(this.i18n.httpError(error, 'cars.loadFormFailed'));
       },
     });
   }
@@ -95,12 +98,12 @@ export class CarForm {
 
     request.subscribe({
       next: (car) => {
-        this.notifications.success(carId ? 'Saved.' : 'QR code created. Print it from the next screen.');
+        this.notifications.success(this.i18n.t(carId ? 'cars.saved' : 'cars.created'));
         void this.router.navigate(['/cars', car.id]);
       },
       error: (error: unknown) => {
         this.saving.set(false);
-        this.errorMessage.set(extractErrorMessage(error, 'Could not save this QR code.'));
+        this.errorMessage.set(this.i18n.httpError(error, 'cars.saveFailed'));
       },
     });
   }

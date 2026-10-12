@@ -4,7 +4,7 @@
   <mat-card>
     <mat-card-content class="!p-5 text-center md:!p-8">
       <mat-icon class="!h-8 !w-8 !text-3xl text-slate-400">link_off</mat-icon>
-      <h1 class="mt-2 font-semibold text-slate-800">We can't find that request</h1>
+      <h1 class="mt-2 font-semibold text-slate-800">{{ 'tracker.missingTitle' | t }}</h1>
       <p class="mt-1 text-sm text-slate-500">{{ errorMessage() }}</p>
     </mat-card-content>
   </mat-card>
@@ -18,16 +18,16 @@
         <mat-icon class="!h-8 !w-8 !text-4xl">{{ headline().icon }}</mat-icon>
       </div>
 
-      <h1 class="text-xl font-semibold text-slate-900">{{ headline().title }}</h1>
-      <p class="mx-auto mt-2 max-w-sm text-sm text-slate-500">{{ headline().description }}</p>
+      <h1 class="text-xl font-semibold text-slate-900">{{ headline().titleKey | t }}</h1>
+      <p class="mx-auto mt-2 max-w-sm text-sm text-slate-500">{{ headline().descriptionKey | t }}</p>
 
-      @if (current.responseLabel) {
+      @if (current.responseType || current.responseLabel) {
         <div class="mt-5 rounded-xl bg-emerald-50 p-4">
           <p class="text-xs font-medium uppercase text-emerald-700">
-            Owner's reply
+            {{ 'tracker.ownerReply' | t }}
           </p>
           <p class="mt-1 text-base font-semibold text-emerald-900">
-            {{ current.responseLabel }}
+            {{ responseLabel(current) }}
           </p>
         </div>
       }
@@ -40,10 +40,10 @@
         <li class="flex gap-3">
           <mat-icon class="!h-5 !w-5 !text-xl text-brand-600">check_circle</mat-icon>
           <div>
-            <p class="font-medium text-slate-800">Request sent</p>
+            <p class="font-medium text-slate-800">{{ 'tracker.sent' | t }}</p>
             <p class="text-xs text-slate-400">
               {{ current.createdAtUtc | relativeTime }} ·
-              {{ current.createdAtUtc | date: 'shortTime' }}
+              {{ current.createdAtUtc | localDate: 'shortTime' }}
             </p>
           </div>
         </li>
@@ -60,7 +60,7 @@
               class="font-medium"
               [class]="seenOrLater() ? 'text-slate-800' : 'text-slate-400'"
             >
-              Owner opened it
+              {{ 'tracker.opened' | t }}
             </p>
           </div>
         </li>
@@ -77,7 +77,7 @@
               class="font-medium"
               [class]="current.respondedAtUtc ? 'text-slate-800' : 'text-slate-400'"
             >
-              Owner replied
+              {{ 'tracker.replied' | t }}
             </p>
             @if (current.respondedAtUtc) {
               <p class="text-xs text-slate-400">
@@ -91,19 +91,19 @@
       @if (isLive()) {
         <p class="mt-6 flex items-center justify-center gap-2 text-xs text-slate-400">
           <mat-spinner diameter="14" />
-          Checking for a reply automatically
+          {{ 'tracker.polling' | t }}
         </p>
       }
 
       <div class="mt-4 flex justify-center">
         <button mat-stroked-button (click)="refresh()">
           <mat-icon>refresh</mat-icon>
-          Check now
+          {{ 'tracker.checkNow' | t }}
         </button>
       </div>
 
       <p class="mt-6 text-center text-xs text-slate-400">
-        Reference {{ current.trackingRef }} — bookmark this page to come back to it.
+        {{ 'tracker.reference' | t: { ref: current.trackingRef } }}
       </p>
     </mat-card-content>
   </mat-card>

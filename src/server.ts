@@ -91,13 +91,13 @@ export function renderAppRequiredLanding(): string {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Open Tala3ny Scanner</title>
   <style>
-    body { margin: 0; font-family: system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+    body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #fcf9f4; color: #1c1c19; }
     main { max-width: 28rem; margin: 0 auto; padding: 1.5rem; }
     .card { background: #fff; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 1px 3px rgb(0 0 0 / 0.08); text-align: center; }
     h1 { font-size: 1.25rem; margin: 0 0 1rem; }
     p { color: #64748b; font-size: 0.95rem; line-height: 1.5; }
     .hint { color: #94a3b8; font-size: 0.8rem; line-height: 1.4; }
-    .btn { display: block; text-align: center; text-decoration: none; background: #4f46e5; color: #fff;
+    .btn { display: block; text-align: center; text-decoration: none; background: #f59e0b; color: #0f172a;
            border-radius: 0.75rem; padding: 0.9rem; font-weight: 600; margin: 1rem 0 0.6rem; }
   </style>
 </head>

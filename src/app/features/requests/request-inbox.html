@@ -1,6 +1,6 @@
 <app-page-header
-  title="Requests"
-  subtitle="Messages from people who scanned one of your QR codes."
+  [title]="'requests.title' | t"
+  [subtitle]="'requests.subtitle' | t"
 />
 
 <div class="-mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-1">
@@ -15,7 +15,7 @@
       "
       (click)="setFilter(filter.value)"
     >
-      {{ filter.label }}
+      {{ filter.labelKey | t }}
     </button>
   }
 </div>
@@ -28,8 +28,8 @@
   <mat-card>
     <app-empty-state
       icon="notifications_off"
-      [title]="activeFilter() ? 'Nothing in this view' : 'No requests yet'"
-      description="When someone scans your code and asks you to move, it appears here."
+      [title]="(activeFilter() ? 'requests.emptyFiltered' : 'requests.empty') | t"
+      [description]="'requests.emptyHint' | t"
     />
   </mat-card>
 } @else {
@@ -54,7 +54,7 @@
 
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
-                <p class="font-medium text-slate-900">{{ request.reasonLabel }}</p>
+                <p class="font-medium text-slate-900">{{ reasonLabel(request) }}</p>
                 <app-status-chip [status]="request.status" />
               </div>
               <p class="mt-0.5 text-sm text-slate-500">

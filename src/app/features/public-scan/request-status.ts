@@ -1,4 +1,4 @@
-import { DatePipe, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -17,7 +17,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { interval, switchMap } from 'rxjs';
 import { PublicScanApiService } from '../../core/api/public-scan-api.service';
-import { extractErrorMessage } from '../../core/http/problem-details';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { LocalDatePipe } from '../../core/i18n/local-date.pipe';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { PublicRequestStatus } from '../../core/models/public-scan.models';
 import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
 
@@ -29,12 +31,13 @@ const LIVE_STATUSES = new Set(['Pending', 'Seen']);
 @Component({
   selector: 'app-request-status',
   imports: [
-    DatePipe,
+    LocalDatePipe,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
     RelativeTimePipe,
+    TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './request-status.html',
@@ -44,6 +47,7 @@ export class RequestStatus {
 
   private readonly publicApi = inject(PublicScanApiService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly i18n = inject(I18nService);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   protected readonly status = signal<PublicRequestStatus | null>(null);
@@ -67,37 +71,37 @@ export class RequestStatus {
       case 'Acknowledged':
         return {
           icon: 'mark_email_read',
-          title: 'The owner replied',
-          description: 'They have seen your request and answered below.',
+          titleKey: 'tracker.ackTitle',
+          descriptionKey: 'tracker.ackBody',
           panelClass: 'bg-emerald-50 text-emerald-600',
         };
       case 'Resolved':
         return {
           icon: 'task_alt',
-          title: 'All done',
-          description: 'The owner marked this request as handled.',
+          titleKey: 'tracker.resolvedTitle',
+          descriptionKey: 'tracker.resolvedBody',
           panelClass: 'bg-emerald-50 text-emerald-600',
         };
       case 'Seen':
         return {
           icon: 'visibility',
-          title: 'The owner has seen it',
-          description: 'They opened your request. Hang on for a reply.',
+          titleKey: 'tracker.seenTitle',
+          descriptionKey: 'tracker.seenBody',
           panelClass: 'bg-sky-50 text-sky-600',
         };
       case 'Expired':
         return {
           icon: 'hourglass_disabled',
-          title: 'This request expired',
-          description: 'Nobody answered in time. You can scan the code again to retry.',
+          titleKey: 'tracker.expiredTitle',
+          descriptionKey: 'tracker.expiredBody',
           panelClass: 'bg-slate-100 text-slate-500',
         };
       default:
         return {
           icon: 'notifications_active',
-          title: 'The owner has been notified',
-          description: "Keep this page open and you'll see their reply as soon as it arrives.",
-          panelClass: 'bg-brand-50 text-brand-600',
+          titleKey: 'tracker.pendingTitle',
+          descriptionKey: 'tracker.pendingBody',
+          panelClass: 'bg-accent-50 text-accent-600',
         };
     }
   });
@@ -117,6 +121,10 @@ export class RequestStatus {
     this.load(this.trackingRef());
   }
 
+  protected responseLabel(status: PublicRequestStatus): string {
+    return this.i18n.response(status.responseType, status.responseLabel ?? '');
+  }
+
   private load(trackingRef: string): void {
     this.publicApi.getRequestStatus(trackingRef).subscribe({
       next: (status) => {
@@ -125,9 +133,7 @@ export class RequestStatus {
       },
       error: (error: unknown) => {
         this.loading.set(false);
-        this.errorMessage.set(
-          extractErrorMessage(error, 'The reference may be wrong or the request may have expired.'),
-        );
+        this.errorMessage.set(this.i18n.httpError(error, 'tracker.loadFailed'));
       },
     });
   }

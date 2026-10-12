@@ -4,10 +4,9 @@
       <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-rose-100">
         <mat-icon class="!h-7 !w-7 !text-3xl text-rose-600">error_outline</mat-icon>
       </div>
-      <h1 class="text-lg font-semibold text-rose-800">This is not a Tala3ny QR code</h1>
+      <h1 class="text-lg font-semibold text-rose-800">{{ 'scanResult.unrecognizedTitle' | t }}</h1>
       <p class="mt-2 text-sm text-slate-600">
-        That code is from another app (Instagram, WhatsApp, a website, and so on). Tala3ny
-        only accepts official car stickers, so it cannot look this up or contact an owner.
+        {{ 'scanResult.unrecognizedBody' | t }}
       </p>
     </mat-card-content>
   </mat-card>
@@ -17,10 +16,9 @@
       <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-rose-50">
         <mat-icon class="!h-7 !w-7 !text-3xl text-rose-500">search_off</mat-icon>
       </div>
-      <h1 class="text-lg font-semibold text-slate-900">This code is not in the system</h1>
+      <h1 class="text-lg font-semibold text-slate-900">{{ 'scanResult.notFoundTitle' | t }}</h1>
       <p class="mt-2 text-sm text-slate-500">
-        Tala3ny does not have this sticker. It may be damaged, fake, or the owner may have
-        replaced it. Ask them for a current Tala3ny code.
+        {{ 'scanResult.notFoundBody' | t }}
       </p>
     </mat-card-content>
   </mat-card>
@@ -30,8 +28,8 @@
       <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-amber-50">
         <mat-icon class="!h-7 !w-7 !text-3xl text-amber-500">history_toggle_off</mat-icon>
       </div>
-      <h1 class="text-lg font-semibold text-slate-900">This code is no longer active</h1>
-      <p class="mt-2 text-sm text-slate-500">The owner removed this QR code.</p>
+      <h1 class="text-lg font-semibold text-slate-900">{{ 'scanResult.retiredTitle' | t }}</h1>
+      <p class="mt-2 text-sm text-slate-500">{{ 'scanResult.retiredBody' | t }}</p>
     </mat-card-content>
   </mat-card>
 } @else if (paused()) {
@@ -40,9 +38,9 @@
       <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-amber-50">
         <mat-icon class="!h-7 !w-7 !text-3xl text-amber-500">pause_circle</mat-icon>
       </div>
-      <h1 class="text-lg font-semibold text-slate-900">This code is not accepting contact</h1>
+      <h1 class="text-lg font-semibold text-slate-900">{{ 'scanResult.pausedTitle' | t }}</h1>
       <p class="mt-2 text-sm text-slate-500">
-        Tala3ny recognised the sticker, but the owner has paused it for now.
+        {{ 'scanResult.pausedBody' | t }}
       </p>
     </mat-card-content>
   </mat-card>
@@ -52,50 +50,117 @@
       <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-rose-50">
         <mat-icon class="!h-7 !w-7 !text-3xl text-rose-500">error_outline</mat-icon>
       </div>
-      <h1 class="text-lg font-semibold text-slate-900">Could not use this QR code</h1>
+      <h1 class="text-lg font-semibold text-slate-900">{{ 'scanResult.errorTitle' | t }}</h1>
       <p class="mt-2 text-sm text-slate-500">{{ errorMessage() }}</p>
     </mat-card-content>
   </mat-card>
 } @else if (scan(); as owner) {
   <mat-card class="mb-4">
     <mat-card-content class="!p-6 text-center">
-      <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-brand-50">
-        <mat-icon class="text-brand-600">verified</mat-icon>
+      <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-accent-50">
+        <mat-icon class="text-accent-600">verified</mat-icon>
       </div>
-      <h1 class="text-lg font-semibold text-slate-900">Recognised Tala3ny code</h1>
+      <h1 class="text-lg font-semibold text-slate-900">{{ 'scanResult.recognisedTitle' | t }}</h1>
       <p class="mt-2 text-xs text-slate-400">
-        Verified by the Tala3ny server. That does not prove this sticker is still on the
-        original car.
+        {{ 'scanResult.recognisedHint' | t }}
       </p>
       <p class="mt-4 font-mono text-2xl text-slate-900">{{ owner.maskedPhone }}</p>
       <p class="mt-2 text-xs text-slate-400">
-        This page shows only a masked hint. Starting a call or WhatsApp can still show the
-        owner's number on your phone.
+        {{ 'scanResult.callHint' | t }}
       </p>
 
       <div class="mt-6 flex flex-col gap-2">
         <a mat-flat-button color="primary" class="!h-12" [href]="callUrl()">
           <mat-icon>call</mat-icon>
-          Call
+          {{ 'scanResult.call' | t }}
         </a>
         <a mat-stroked-button class="!h-12" [href]="whatsAppUrl()">
           <mat-icon>chat</mat-icon>
-          WhatsApp
+          {{ 'scanResult.whatsapp' | t }}
         </a>
+        @if (owner.acceptsRequests) {
+          @if (!composing()) {
+            <button mat-stroked-button type="button" class="!h-12" (click)="startCompose()">
+              <mat-icon>campaign</mat-icon>
+              {{ 'scanResult.sendMessage' | t }}
+            </button>
+            <p class="px-1 text-start text-xs text-slate-400">
+              {{ 'scanResult.sendMessageHint' | t }}
+            </p>
+          } @else {
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-start">
+              <p class="text-sm font-medium text-slate-800">{{ 'scanResult.reasonLabel' | t }}</p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                @for (reason of reasons; track reason.code) {
+                  <button
+                    type="button"
+                    class="rounded-full px-3 py-1.5 text-sm font-medium transition"
+                    [class]="
+                      selectedReason() === reason.code
+                        ? 'bg-brand-600 text-white'
+                        : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'
+                    "
+                    (click)="selectReason(reason.code)"
+                  >
+                    {{ ('reason.' + reason.code) | t }}
+                  </button>
+                }
+              </div>
+
+              <label class="mt-4 block text-sm font-medium text-slate-700">
+                {{ (selectedRequiresNote() ? 'scanResult.noteRequired' : 'scanResult.noteLabel') | t }}
+                <textarea
+                  class="mt-1.5 min-h-24 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                  rows="3"
+                  maxlength="280"
+                  [value]="note()"
+                  [attr.placeholder]="'scanResult.notePlaceholder' | t"
+                  (input)="onNoteInput($event)"
+                ></textarea>
+              </label>
+
+              @if (sendError()) {
+                <p class="mt-3 text-sm text-rose-700">{{ sendError() }}</p>
+              }
+
+              <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+                <button
+                  mat-flat-button
+                  color="primary"
+                  class="!h-11"
+                  type="button"
+                  [disabled]="!canSend()"
+                  (click)="submitRequest()"
+                >
+                  {{ (sending() ? 'scanResult.sending' : 'scanResult.send') | t }}
+                </button>
+                <button
+                  mat-button
+                  type="button"
+                  class="!h-11"
+                  [disabled]="sending()"
+                  (click)="cancelCompose()"
+                >
+                  {{ 'scanResult.cancelCompose' | t }}
+                </button>
+              </div>
+            </div>
+          }
+        }
       </div>
     </mat-card-content>
   </mat-card>
 
   <mat-card>
     <mat-card-content class="!p-4 md:!p-6">
-      <h2 class="text-sm font-semibold uppercase text-slate-400">Last location</h2>
+      <h2 class="text-sm font-semibold uppercase text-slate-400">{{ 'scanResult.lastLocation' | t }}</h2>
 
       @if (mapsUrl(); as mapLink) {
         <p class="mt-2 text-sm text-slate-600">
-          Reported
+          {{ 'scanResult.reported' | t }}
           {{ owner.lastLocatedAtUtc | relativeTime }}
           @if (owner.lastLocatedAtUtc) {
-            · {{ owner.lastLocatedAtUtc | date: 'short' }}
+            · {{ owner.lastLocatedAtUtc | localDate: 'short' }}
           }
         </p>
         <p class="mt-1 font-mono text-xs text-slate-400">
@@ -104,16 +169,14 @@
         </p>
         <a mat-flat-button color="primary" class="!mt-4 !h-11 w-full" [href]="mapLink" target="_blank" rel="noopener">
           <mat-icon>map</mat-icon>
-          Open in maps
+          {{ 'scanResult.openMaps' | t }}
         </a>
         <p class="mt-3 text-xs text-slate-400">
-          This is the last position the owner sent while their phone was on and the app was
-          open. A switched-off phone cannot be located.
+          {{ 'scanResult.locationHint' | t }}
         </p>
       } @else {
         <p class="mt-2 text-sm text-slate-500">
-          No location yet. The owner has to turn on sharing and keep the app open on their
-          phone. A closed or powered-off phone cannot be found.
+          {{ 'scanResult.noLocation' | t }}
         </p>
       }
     </mat-card-content>

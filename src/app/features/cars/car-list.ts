@@ -7,7 +7,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { CarsApiService } from '../../core/api/cars-api.service';
-import { extractErrorMessage } from '../../core/http/problem-details';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { Car } from '../../core/models/car.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { EmptyState } from '../../shared/ui/empty-state';
@@ -25,6 +26,7 @@ import { ConfirmDialog, ConfirmDialogData } from '../../shared/ui/confirm-dialog
     MatProgressSpinnerModule,
     PageHeader,
     EmptyState,
+    TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './car-list.html',
@@ -33,6 +35,7 @@ export class CarList {
   private readonly carsApi = inject(CarsApiService);
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
+  private readonly i18n = inject(I18nService);
 
   protected readonly cars = signal<Car[]>([]);
   protected readonly loading = signal(true);
@@ -52,17 +55,16 @@ export class CarList {
       },
       error: (error: unknown) => {
         this.loading.set(false);
-        this.errorMessage.set(extractErrorMessage(error, 'Could not load your cars.'));
+        this.errorMessage.set(this.i18n.httpError(error, 'cars.loadFailed'));
       },
     });
   }
 
   protected confirmDelete(car: Car): void {
     const data: ConfirmDialogData = {
-      title: `Remove ${car.plateNumber}?`,
-      message:
-        'The QR code for this car stops working straight away, so any sticker still on the windscreen will show a "no longer active" page. Past requests are kept.',
-      confirmLabel: 'Remove car',
+      title: this.i18n.t('cars.removeTitle', { plate: car.plateNumber }),
+      message: this.i18n.t('cars.removeMessage'),
+      confirmLabel: this.i18n.t('cars.remove'),
       destructive: true,
     };
 
@@ -80,10 +82,10 @@ export class CarList {
     this.carsApi.delete(car.id).subscribe({
       next: () => {
         this.cars.update((cars) => cars.filter((item) => item.id !== car.id));
-        this.notifications.success(`${car.plateNumber} removed.`);
+        this.notifications.success(this.i18n.t('cars.removed', { plate: car.plateNumber }));
       },
       error: (error: unknown) =>
-        this.notifications.error(extractErrorMessage(error, 'Could not remove the car.')),
+        this.notifications.error(this.i18n.httpError(error, 'cars.removeFailed')),
     });
   }
 }

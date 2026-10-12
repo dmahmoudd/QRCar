@@ -8,7 +8,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-import { extractErrorMessage } from '../../core/http/problem-details';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { BrandLogo } from '../../shared/ui/brand-logo';
+import { LanguageSwitcher } from '../../shared/ui/language-switcher';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +24,9 @@ import { extractErrorMessage } from '../../core/http/problem-details';
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
+    TranslatePipe,
+    LanguageSwitcher,
+    BrandLogo,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { ngSkipHydration: 'true' },
@@ -30,6 +36,7 @@ export class Login {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly i18n = inject(I18nService);
 
   /** Bound from query params via withComponentInputBinding. */
   readonly returnUrl = input<string>('');
@@ -55,12 +62,12 @@ export class Login {
 
     this.auth.login(this.form.getRawValue()).subscribe({
       next: () => {
-        const target = this.returnUrl() || '/dashboard';
+        const target = this.returnUrl() || '/cars';
         void this.router.navigateByUrl(target);
       },
       error: (error: unknown) => {
         this.loading.set(false);
-        this.errorMessage.set(extractErrorMessage(error, 'Could not sign you in.'));
+        this.errorMessage.set(this.i18n.httpError(error, 'login.failed'));
       },
     });
   }

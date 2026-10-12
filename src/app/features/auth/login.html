@@ -1,12 +1,14 @@
 <div class="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-4 py-6">
+  <div class="mb-4 flex justify-end">
+    <app-language-switcher />
+  </div>
+
   <div class="mb-6 text-center">
-    <div
-      class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-brand-600 text-white"
-    >
-      <mat-icon class="!h-8 !w-8 !text-3xl">qr_code_2</mat-icon>
+    <div class="mx-auto mb-4 flex justify-center">
+      <app-brand-logo fullClass="h-24 w-24 object-contain" />
     </div>
-    <h1 class="text-2xl font-semibold text-slate-900">Welcome back</h1>
-    <p class="mt-1 text-sm leading-5 text-slate-500">Sign in to manage your cars and QR codes.</p>
+    <h1 class="text-2xl font-semibold text-slate-900">{{ 'login.welcome' | t }}</h1>
+    <p class="mt-1 text-sm leading-5 text-slate-500">{{ 'login.subtitle' | t }}</p>
   </div>
 
   <mat-card class="p-2">
@@ -20,7 +22,7 @@
           class="mb-4 flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-900"
         >
           <mat-icon class="!h-5 !w-5 !text-xl">schedule</mat-icon>
-          <span>Your session expired. Please sign in again.</span>
+          <span>{{ 'login.expired' | t }}</span>
         </div>
       }
 
@@ -33,15 +35,15 @@
 
       <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-2">
         <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
+          <mat-label>{{ 'login.email' | t }}</mat-label>
           <input matInput type="email" formControlName="email" autocomplete="email" />
           @if (form.controls.email.touched && form.controls.email.invalid) {
-            <mat-error>Enter a valid email address.</mat-error>
+            <mat-error>{{ 'login.emailInvalid' | t }}</mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Password</mat-label>
+          <mat-label>{{ 'login.password' | t }}</mat-label>
           <input
             matInput
             [type]="showPassword() ? 'text' : 'password'"
@@ -52,13 +54,13 @@
             mat-icon-button
             matSuffix
             type="button"
-            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            [attr.aria-label]="showPassword() ? ('login.hidePassword' | t) : ('login.showPassword' | t)"
             (click)="showPassword.set(!showPassword())"
           >
             <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
           @if (form.controls.password.touched && form.controls.password.invalid) {
-            <mat-error>Password is required.</mat-error>
+            <mat-error>{{ 'login.passwordRequired' | t }}</mat-error>
           }
         </mat-form-field>
 
@@ -69,18 +71,22 @@
           type="submit"
           [disabled]="loading()"
         >
-          {{ loading() ? 'Signing in…' : 'Sign in' }}
+          {{ loading() ? ('login.submitting' | t) : ('login.submit' | t) }}
         </button>
       </form>
     </mat-card-content>
   </mat-card>
 
   <p class="mt-6 text-center text-sm text-slate-500">
-    Don't have an account?
-    <a class="font-medium text-brand-600 hover:underline" routerLink="/register">Create one</a>
+    {{ 'login.noAccount' | t }}
+    <a class="font-medium text-brand-600 hover:underline" routerLink="/register">{{
+      'login.createOne' | t
+    }}</a>
   </p>
   <p class="mt-3 text-center text-sm text-slate-500">
-    Just need to contact a car owner?
-    <a class="font-medium text-brand-600 hover:underline" routerLink="/scan">Scan a QR code</a>
+    {{ 'login.justScan' | t }}
+    <a class="font-medium text-brand-600 hover:underline" routerLink="/scan">{{
+      'login.scanLink' | t
+    }}</a>
   </p>
 </div>

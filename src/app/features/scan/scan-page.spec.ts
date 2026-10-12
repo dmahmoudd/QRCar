@@ -32,10 +32,18 @@ describe('ScanPage', () => {
     router = jasmine.createSpyObj('Router', ['navigate']);
     router.navigate.and.resolveTo(true);
 
-    camera = jasmine.createSpyObj('QrCameraService', ['isSupported', 'start', 'stop']);
+    camera = jasmine.createSpyObj('QrCameraService', [
+      'isSupported',
+      'start',
+      'stop',
+      'canTorch',
+      'setTorch',
+    ]);
     camera.isSupported.and.returnValue(true);
     camera.start.and.resolveTo();
     camera.stop.and.resolveTo();
+    camera.canTorch.and.returnValue(false);
+    camera.setTorch.and.resolveTo(false);
 
     await TestBed.configureTestingModule({
       imports: [ScanPage],
@@ -76,7 +84,41 @@ describe('ScanPage', () => {
     expect(text).toContain(recognised.maskedPhone);
     expect(text).toContain('Call');
     expect(text).toContain('WhatsApp');
+    expect(text).toContain('Send a message');
     expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('sends a move request and opens the public tracker', async () => {
+    const pending = page.onDecoded(OFFICIAL_URL);
+    http.expectOne(`${environment.apiBaseUrl}/public/scans`).flush(recognised);
+    await pending;
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    const openCompose = Array.from(host.querySelectorAll('button')).find((button) =>
+      button.textContent?.includes('Send a message'),
+    );
+    expect(openCompose).toBeTruthy();
+    openCompose!.click();
+    fixture.detectChanges();
+
+    const send = Array.from(host.querySelectorAll('button')).find((button) =>
+      button.textContent?.includes('Send request'),
+    );
+    expect(send).toBeTruthy();
+    send!.click();
+
+    const request = http.expectOne(`${environment.apiBaseUrl}/public/scans/${SCAN_ID}/requests`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ reason: 'BlockingMyCar', message: null });
+    request.flush({
+      trackingRef: 'track-abc',
+      createdAtUtc: '2026-10-12T00:00:00Z',
+      expiresAtUtc: '2026-10-13T00:00:00Z',
+    });
+    fixture.detectChanges();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/r', 'track-abc']);
   });
 
   it('validates a bare public token the same way', async () => {

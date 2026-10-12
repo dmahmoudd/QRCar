@@ -8,13 +8,28 @@ html {
   @include mat.theme(
     (
       color: (
-        primary: mat.$violet-palette,
-        tertiary: mat.$blue-palette,
+        primary: mat.$orange-palette,
+        tertiary: mat.$orange-palette,
       ),
       typography: Roboto,
       density: 0,
     )
   );
+
+  --mat-sys-primary: #f59e0b;
+  --mat-sys-on-primary: #0f172a;
+  --mat-sys-primary-container: #ffddb8;
+  --mat-sys-on-primary-container: #613b00;
+  --mat-sys-secondary: #0f172a;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-surface: #fcf9f4;
+  --mat-sys-surface-container: #f0ede9;
+  --mat-sys-surface-container-low: #f6f3ee;
+  --mat-sys-surface-container-high: #ebe8e3;
+  --mat-sys-on-surface: #1c1c19;
+  --mat-sys-on-surface-variant: #534434;
+  --mat-sys-outline: #867461;
+  --mat-sys-outline-variant: #d8c3ad;
 
   color-scheme: light;
   height: 100%;
@@ -28,29 +43,70 @@ body {
   min-height: 100%;
   min-height: 100dvh;
   width: 100%;
-  background: var(--mat-sys-surface-container-low);
-  color: var(--mat-sys-on-surface);
+  background: #fcf9f4;
+  color: #1c1c19;
   letter-spacing: normal;
   word-spacing: normal;
   -webkit-font-smoothing: antialiased;
 }
 
 /*
- * Material Icons must never become the page face. Ligatures turn "Dashboard"
- * into a mashed glyph and eat spaces on every label.
+ * Material Icons ligatures eat spaces in labels ("Share my" → "Sharemy")
+ * if that font leaks onto body copy. Lock text faces on real copy nodes,
+ * then re-enable ligatures only on the icon host.
  */
 html,
 body,
 app-root {
-  font-family: Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  font-family: Inter, 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif !important;
   font-feature-settings: 'kern' 1 !important;
   font-variant-ligatures: none !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
 }
 
-*:not(mat-icon):not(.mat-icon):not(.material-icons):not(.mat-mdc-icon):not(.font-mono) {
-  font-family: Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+html[dir='rtl'],
+html[dir='rtl'] body,
+html[dir='rtl'] app-root {
+  font-family: Cairo, Tahoma, 'Segoe UI', sans-serif !important;
+}
+
+p,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+button,
+a,
+label,
+li,
+td,
+th,
+div,
+section,
+article,
+small,
+strong,
+em,
+input,
+textarea,
+header,
+footer,
+nav,
+main,
+aside,
+.mdc-button__label,
+.mat-mdc-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-outlined-button {
+  font-family: inherit !important;
   font-feature-settings: 'kern' 1 !important;
   font-variant-ligatures: none !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
 }
 
 .font-mono,
@@ -62,12 +118,70 @@ pre {
 mat-icon,
 .mat-icon,
 .material-icons,
-.mat-mdc-icon {
+.mat-mdc-icon,
+.mat-ligature-font {
   font-family: 'Material Icons' !important;
-  font-weight: normal;
-  font-style: normal;
-  font-feature-settings: 'liga' !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  font-feature-settings: 'liga' 1 !important;
   font-variant-ligatures: discretionary-ligatures !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  font-size: 1.25rem !important;
+  line-height: 1 !important;
+  vertical-align: middle;
+}
+
+.icon-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  line-height: 0;
+}
+
+.icon-slot mat-icon,
+.icon-slot .mat-icon {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  font-size: 1.25rem !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.icon-slot-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+.icon-slot-sm mat-icon,
+.icon-slot-sm .mat-icon {
+  width: 1rem !important;
+  height: 1rem !important;
+  font-size: 1rem !important;
+}
+
+.icon-lg mat-icon,
+mat-icon.icon-lg {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  font-size: 2.25rem !important;
+}
+
+.icon-xl mat-icon,
+mat-icon.icon-xl {
+  width: 4rem !important;
+  height: 4rem !important;
+  font-size: 4rem !important;
 }
 
 app-root {
@@ -88,6 +202,26 @@ app-root {
 /* Slightly tighter default card padding than Material ships with. */
 .mat-mdc-card {
   border-radius: 16px !important;
+  background: #ffffff !important;
+  box-shadow: 0 4px 16px -2px rgb(15 23 42 / 0.04), 0 2px 4px -1px rgb(15 23 42 / 0.02) !important;
+}
+
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-fab.mat-primary {
+  background-color: #f59e0b !important;
+  color: #0f172a !important;
+}
+
+.mat-mdc-outlined-button {
+  border-color: #0f172a !important;
+  color: #0f172a !important;
+}
+
+.mat-mdc-progress-bar,
+.mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: #f59e0b;
+  --mdc-linear-progress-active-indicator-color: #f59e0b;
 }
 
 /*
@@ -140,6 +274,78 @@ svg {
   max-width: 100%;
 }
 
+.shell-frame {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+}
+
+.shell-toolbar {
+  display: flex;
+  min-height: 3.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-inline: max(0.75rem, env(safe-area-inset-left)) max(0.75rem, env(safe-area-inset-right));
+  background: #0f172a;
+  color: #fff;
+}
+
+.shell-toolbar-start,
+.shell-toolbar-end {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.shell-toolbar-brand {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.65rem;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.shell-toolbar-user {
+  color: #fff !important;
+  text-transform: none !important;
+}
+
+.shell-toolbar-user-name {
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+@media (max-width: 639.98px) {
+  .shell-toolbar-user-name {
+    display: none;
+  }
+}
+
+.shell-toolbar-icon,
+.shell-toolbar-user {
+  --mdc-icon-button-icon-color: #fff;
+  --mat-standard-button-toggle-label-text-color: #fff;
+}
+
+.shell-toolbar .mat-icon {
+  color: #fff !important;
+}
+
+.shell-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 /*
  * Do not force sidenav content to 100vw. In side mode that sits beside a
  * 16rem drawer and clips the third dashboard card on large screens.
@@ -149,14 +355,70 @@ svg {
   min-width: 0;
 }
 
-.shell-nav {
-  width: min(16rem, 86vw);
+.shell-nav.mat-drawer,
+.shell-nav.mat-sidenav {
+  width: 14.5rem !important;
+  min-width: 14.5rem !important;
+  max-width: 14.5rem !important;
+  background: #f6f3ee !important;
+  box-shadow: none !important;
 }
 
-@media (min-width: 768px) {
-  .shell-nav {
-    width: 16rem;
-  }
+.shell-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.85rem 0.5rem 1rem;
+}
+
+.shell-link {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.4rem;
+  padding: 0 0.7rem;
+  border-radius: 0.75rem;
+  color: #534434;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.shell-link:hover:not(.is-active) {
+  background: #ebe8e3;
+  color: #1c1c19;
+}
+
+.shell-link.is-active {
+  background: #f59e0b;
+  color: #613b00;
+}
+
+.shell-link-icon.mat-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 1.25rem;
+  line-height: 1.25rem;
+  color: inherit !important;
+}
+
+.shell-link-label {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.shell-link-count {
+  margin-inline-start: auto;
+  color: #a73a00;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.shell-link.is-active .shell-link-count {
+  color: #fdba74;
 }
 
 .mat-toolbar {

@@ -17,8 +17,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CarsApiService } from '../../core/api/cars-api.service';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { QrCode, QrImageFormat } from '../../core/models/car.models';
-import { extractErrorMessage } from '../../core/http/problem-details';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/ui/confirm-dialog';
 
@@ -30,6 +31,7 @@ import { ConfirmDialog, ConfirmDialogData } from '../../shared/ui/confirm-dialog
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -53,6 +55,7 @@ export class QrPanel {
   private readonly carsApi = inject(CarsApiService);
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
+  private readonly i18n = inject(I18nService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
@@ -83,7 +86,7 @@ export class QrPanel {
       },
       error: (error: unknown) => {
         this.loading.set(false);
-        this.errorMessage.set(extractErrorMessage(error, 'Could not load the QR code.'));
+        this.errorMessage.set(this.i18n.httpError(error, 'qr.loadFailed'));
       },
     });
   }
@@ -106,7 +109,7 @@ export class QrPanel {
       },
       error: (error: unknown) => {
         this.loading.set(false);
-        this.errorMessage.set(extractErrorMessage(error, 'Could not render the QR image.'));
+        this.errorMessage.set(this.i18n.httpError(error, 'qr.renderFailed'));
       },
     });
   }
@@ -130,7 +133,7 @@ export class QrPanel {
         URL.revokeObjectURL(url);
       },
       error: (error: unknown) =>
-        this.notifications.error(extractErrorMessage(error, 'Download failed.')),
+        this.notifications.error(this.i18n.httpError(error, 'qr.downloadFailed')),
     });
   }
 
@@ -142,7 +145,7 @@ export class QrPanel {
 
     const printWindow = window.open('', '_blank', 'width=520,height=680');
     if (!printWindow) {
-      this.notifications.error('Your browser blocked the print window.');
+      this.notifications.error(this.i18n.t('qr.printBlocked'));
       return;
     }
 
@@ -151,7 +154,7 @@ export class QrPanel {
     printWindow.document.write(`<!doctype html>
 <html>
   <head>
-    <title>QR sticker ${plate}</title>
+    <title>${this.i18n.t('qr.printTitle', { plate })}</title>
     <style>
       body { font-family: system-ui, sans-serif; text-align: center; padding: 32px; }
       img { width: 360px; height: auto; }
@@ -162,9 +165,9 @@ export class QrPanel {
   </head>
   <body>
     <div class="frame">
-      <img src="${imageUrl}" alt="QR code" />
-      <h1>Please scan to contact the owner</h1>
-      <p>${plate} · sticker v${code.qrVersion}</p>
+      <img src="${imageUrl}" alt="${this.i18n.t('qr.alt')}" />
+      <h1>${this.i18n.t('qr.printHeading')}</h1>
+      <p>${this.i18n.t('qr.printFooter', { plate, version: code.qrVersion })}</p>
     </div>
     <script>
       // Waiting for the image keeps the print preview from opening on a blank page.
@@ -185,16 +188,15 @@ export class QrPanel {
 
     void navigator.clipboard
       .writeText(url)
-      .then(() => this.notifications.success('Scan link copied.'))
-      .catch(() => this.notifications.error('Could not copy the link.'));
+      .then(() => this.notifications.success(this.i18n.t('qr.copied')))
+      .catch(() => this.notifications.error(this.i18n.t('qr.copyFailed')));
   }
 
   protected confirmRotate(): void {
     const data: ConfirmDialogData = {
-      title: 'Replace this QR code?',
-      message:
-        'A new code will be issued immediately. Any sticker you have already printed will stop working, so you will need to print and fit a replacement.',
-      confirmLabel: 'Replace code',
+      title: this.i18n.t('qr.replaceTitle'),
+      message: this.i18n.t('qr.replaceMessage'),
+      confirmLabel: this.i18n.t('qr.replaceConfirm'),
       destructive: true,
     };
 
@@ -221,11 +223,11 @@ export class QrPanel {
         this.qr.set(rotatedCode);
         this.loadImage(rotatedCode.carId);
         this.rotated.emit(rotatedCode);
-        this.notifications.success('New QR code issued. Print the replacement sticker.');
+        this.notifications.success(this.i18n.t('qr.replaced'));
       },
       error: (error: unknown) => {
         this.loading.set(false);
-        this.notifications.error(extractErrorMessage(error, 'Could not replace the code.'));
+        this.notifications.error(this.i18n.httpError(error, 'qr.replaceFailed'));
       },
     });
   }

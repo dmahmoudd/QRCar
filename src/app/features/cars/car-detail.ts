@@ -5,7 +5,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { CarsApiService } from '../../core/api/cars-api.service';
-import { extractErrorMessage } from '../../core/http/problem-details';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { Car } from '../../core/models/car.models';
 import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
 import { PageHeader } from '../../shared/ui/page-header';
@@ -22,6 +23,7 @@ import { QrPanel } from '../qr/qr-panel';
     PageHeader,
     QrPanel,
     RelativeTimePipe,
+    TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './car-detail.html',
@@ -30,6 +32,7 @@ export class CarDetail {
   readonly carId = input.required<string>();
 
   private readonly carsApi = inject(CarsApiService);
+  private readonly i18n = inject(I18nService);
 
   protected readonly car = signal<Car | null>(null);
   protected readonly loading = signal(true);
@@ -55,7 +58,7 @@ export class CarDetail {
       },
       error: (error: unknown) => {
         this.loading.set(false);
-        this.errorMessage.set(extractErrorMessage(error, 'Could not load this car.'));
+        this.errorMessage.set(this.i18n.httpError(error, 'cars.loadCarFailed'));
       },
     });
   }

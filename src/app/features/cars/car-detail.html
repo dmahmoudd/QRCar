@@ -4,12 +4,12 @@
   <div class="rounded-lg bg-rose-50 p-4 text-sm text-rose-900">{{ errorMessage() }}</div>
 } @else if (car(); as vehicle) {
   <app-page-header
-    [title]="vehicle.nickname || 'QR code'"
-    subtitle="Anyone who scans this can contact you without seeing your full number."
+    [title]="vehicle.nickname || ('common.qrCode' | t)"
+    [subtitle]="'cars.detailSubtitle' | t"
   >
     <button mat-stroked-button [routerLink]="['/cars', vehicle.id, 'edit']">
       <mat-icon>edit</mat-icon>
-      Edit
+      {{ 'common.edit' | t }}
     </button>
     <button
       mat-stroked-button
@@ -17,7 +17,7 @@
       [queryParams]="{ carId: vehicle.id }"
     >
       <mat-icon>notifications</mat-icon>
-      Requests
+      {{ 'cars.requests' | t }}
     </button>
   </app-page-header>
 
@@ -30,34 +30,29 @@
 
     <mat-card>
       <mat-card-header class="!px-4 !pt-5 md:!px-6 md:!pt-6">
-        <mat-card-title class="text-lg font-semibold">Details</mat-card-title>
+        <mat-card-title class="text-lg font-semibold">{{ 'cars.details' | t }}</mat-card-title>
       </mat-card-header>
 
       <mat-card-content class="!px-4 !pb-5 md:!px-6 md:!pb-6">
         <dl class="divide-y divide-slate-100">
           <div class="flex justify-between py-3">
-            <dt class="text-sm text-slate-500">Status</dt>
-            <dd class="text-sm text-slate-900">{{ vehicle.isActive ? 'Active' : 'Paused' }}</dd>
+            <dt class="text-sm text-slate-500">{{ 'cars.status' | t }}</dt>
+            <dd class="text-sm text-slate-900">{{ (vehicle.isActive ? 'common.active' : 'common.paused') | t }}</dd>
           </div>
           <div class="flex justify-between py-3">
-            <dt class="text-sm text-slate-500">Times scanned</dt>
-            <dd class="text-sm text-slate-900">{{ vehicle.scanCount }}</dd>
-          </div>
-          <div class="flex justify-between py-3">
-            <dt class="text-sm text-slate-500">Last scanned</dt>
+            <dt class="text-sm text-slate-500">{{ 'cars.lastScanned' | t }}</dt>
             <dd class="text-sm text-slate-900">
-              {{ vehicle.lastScannedAtUtc ? (vehicle.lastScannedAtUtc | relativeTime) : 'Never' }}
+              {{ vehicle.lastScannedAtUtc ? (vehicle.lastScannedAtUtc | relativeTime) : ('common.never' | t) }}
             </dd>
           </div>
           <div class="flex justify-between py-3">
-            <dt class="text-sm text-slate-500">Added</dt>
+            <dt class="text-sm text-slate-500">{{ 'cars.added' | t }}</dt>
             <dd class="text-sm text-slate-900">{{ vehicle.createdAtUtc | relativeTime }}</dd>
           </div>
         </dl>
 
         <div class="mt-4 rounded-lg bg-slate-50 p-4 text-xs text-slate-500">
-          Scanners see the phone number on your profile. Turn on location sharing there if
-          you also want them to see your last reported position.
+          {{ 'cars.detailHint' | t }}
         </div>
       </mat-card-content>
     </mat-card>

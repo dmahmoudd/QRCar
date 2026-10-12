@@ -12,7 +12,9 @@ import {
 } from '@angular/router';
 
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { TitleStrategy } from '@angular/router';
 import { authInterceptor } from './core/auth/auth.interceptor';
+import { TranslatedTitleStrategy } from './core/i18n/title.strategy';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -29,5 +31,6 @@ export const appConfig: ApplicationConfig = {
     // withFetch is required for HttpClient to work during server-side rendering.
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
+    { provide: TitleStrategy, useClass: TranslatedTitleStrategy },
   ],
 };

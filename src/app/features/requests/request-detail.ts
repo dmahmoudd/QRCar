@@ -1,12 +1,13 @@
-import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { ParkingRequestsApiService } from '../../core/api/parking-requests-api.service';
-import { extractErrorMessage } from '../../core/http/problem-details';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { LocalDatePipe } from '../../core/i18n/local-date.pipe';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
   ParkingRequest,
   ParkingResponseType,
@@ -20,13 +21,14 @@ import { StatusChip } from '../../shared/ui/status-chip';
   selector: 'app-request-detail',
   imports: [
     RouterLink,
-    DatePipe,
+    LocalDatePipe,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
     StatusChip,
     RelativeTimePipe,
+    TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './request-detail.html',
@@ -36,8 +38,16 @@ export class RequestDetail {
 
   private readonly requestsApi = inject(ParkingRequestsApiService);
   private readonly notifications = inject(NotificationService);
+  private readonly i18n = inject(I18nService);
 
-  protected readonly responseOptions = RESPONSE_OPTIONS;
+  protected readonly responseOptions = computed(() => {
+    this.i18n.locale();
+    return RESPONSE_OPTIONS.map((option) => ({
+      ...option,
+      label: this.i18n.response(option.value),
+    }));
+  });
+
   protected readonly request = signal<ParkingRequest | null>(null);
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
@@ -64,7 +74,7 @@ export class RequestDetail {
       },
       error: (error: unknown) => {
         this.loading.set(false);
-        this.errorMessage.set(extractErrorMessage(error, 'Could not load this request.'));
+        this.errorMessage.set(this.i18n.httpError(error, 'requests.loadOneFailed'));
       },
     });
   }
@@ -73,8 +83,16 @@ export class RequestDetail {
     return request.status === 'Pending' || request.status === 'Seen';
   }
 
+  protected reasonLabel(request: ParkingRequest): string {
+    return this.i18n.reason(request.reason, request.reasonLabel);
+  }
+
   protected responseLabel(responseType: ParkingResponseType | null): string {
-    return RESPONSE_OPTIONS.find((option) => option.value === responseType)?.label ?? '—';
+    return this.i18n.response(responseType);
+  }
+
+  protected statusShort(status: string): string {
+    return this.i18n.statusShort(status);
   }
 
   protected respond(responseType: ParkingResponseType): void {
@@ -84,11 +102,11 @@ export class RequestDetail {
       next: (updated) => {
         this.request.set(updated);
         this.saving.set(false);
-        this.notifications.success('Reply sent. They can see it now.');
+        this.notifications.success(this.i18n.t('requests.replySent'));
       },
       error: (error: unknown) => {
         this.saving.set(false);
-        this.notifications.error(extractErrorMessage(error, 'Could not send your reply.'));
+        this.notifications.error(this.i18n.httpError(error, 'requests.replyFailed'));
       },
     });
   }
@@ -100,11 +118,11 @@ export class RequestDetail {
       next: (updated) => {
         this.request.set(updated);
         this.saving.set(false);
-        this.notifications.success('Marked as resolved.');
+        this.notifications.success(this.i18n.t('requests.markedResolved'));
       },
       error: (error: unknown) => {
         this.saving.set(false);
-        this.notifications.error(extractErrorMessage(error, 'Could not resolve this request.'));
+        this.notifications.error(this.i18n.httpError(error, 'requests.resolveFailed'));
       },
     });
   }
