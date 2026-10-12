@@ -10,12 +10,9 @@ import {
   PLATFORM_ID,
   signal,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { CarsApiService } from '../../core/api/cars-api.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
@@ -25,22 +22,12 @@ import { ConfirmDialog, ConfirmDialogData } from '../../shared/ui/confirm-dialog
 
 @Component({
   selector: 'app-qr-panel',
-  imports: [
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule,
-    TranslatePipe,
-  ],
+  imports: [MatIconModule, MatProgressSpinnerModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     :host {
       display: block;
-    }
-
-    :host ::ng-deep .qr-action.mat-mdc-button-base {
-      width: 100%;
+      min-width: 0;
     }
   `,
   templateUrl: './qr-panel.html',

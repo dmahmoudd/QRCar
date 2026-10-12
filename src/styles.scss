@@ -58,15 +58,36 @@ body {
  */
 html,
 body,
-app-root {
-  font-family: Inter, 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+app-root,
+.app-dir {
+  font-family: Inter, 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif !important;
 }
 
 html[dir='rtl'],
 html[dir='rtl'] body,
-html[dir='rtl'] app-root {
-  font-family: Cairo, Tahoma, 'Segoe UI', sans-serif;
+html[dir='rtl'] app-root,
+html[dir='rtl'] .app-dir {
+  font-family: Cairo, Tahoma, 'Segoe UI', sans-serif !important;
   letter-spacing: 0;
+}
+
+p,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+a,
+button,
+label,
+li,
+dt,
+dd,
+code,
+.mdc-button__label {
+  font-family: inherit !important;
 }
 
 .font-mono,
@@ -275,6 +296,12 @@ svg {
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.01em;
+}
+
+@media (max-width: 639.98px) {
+  .shell-toolbar-brand > span {
+    display: none;
+  }
 }
 
 .shell-toolbar-user {

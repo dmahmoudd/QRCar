@@ -223,7 +223,7 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     'requests.all': 'All requests',
     'requests.replyPrompt': "Let them know what you're doing",
     'requests.replyHint':
-      'They see your reply on the page they used to contact you. Your number is not shared.',
+      'They see your reply on the tracking page that opened after they sent the request. Your number is not shared.',
     'requests.youReplied': 'You replied',
     'requests.markResolved': 'Mark resolved',
     'requests.closed': 'This request is {status} and no longer needs an answer.',
@@ -379,6 +379,7 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
 
     'tracker.missingTitle': "We can't find that request",
     'tracker.ownerReply': "Owner's reply",
+    'tracker.replyStaysHere': 'This is the page that updates when the owner answers. Keep it open.',
     'tracker.sent': 'Request sent',
     'tracker.opened': 'Owner opened it',
     'tracker.replied': 'Owner replied',
@@ -630,7 +631,7 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     'requests.all': 'كل الطلبات',
     'requests.replyPrompt': 'أخبرهم بما ستفعله',
     'requests.replyHint':
-      'يرون ردك في الصفحة التي تواصلوا منها. رقمك لا يُشارك.',
+      'يرون ردك في صفحة المتابعة التي فُتحت بعد إرسال الطلب. رقمك لا يُشارك.',
     'requests.youReplied': 'لقد رددت',
     'requests.markResolved': 'تعليم كمُنجز',
     'requests.closed': 'هذا الطلب {status} ولم يعد يحتاج رداً.',
@@ -785,6 +786,7 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
 
     'tracker.missingTitle': 'لا يمكننا العثور على هذا الطلب',
     'tracker.ownerReply': 'رد صاحب السيارة',
+    'tracker.replyStaysHere': 'هذه الصفحة تتحدث عندما يرد صاحب السيارة. أبقِها مفتوحة.',
     'tracker.sent': 'تم إرسال الطلب',
     'tracker.opened': 'فتحه صاحب السيارة',
     'tracker.replied': 'رد صاحب السيارة',

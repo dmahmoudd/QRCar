@@ -1,60 +1,62 @@
 @if (loading()) {
   <div class="grid h-64 place-items-center"><mat-spinner diameter="40" /></div>
 } @else if (errorMessage()) {
-  <div class="rounded-lg bg-rose-50 p-4 text-sm text-rose-900">{{ errorMessage() }}</div>
+  <div class="rounded-lg bg-error-container p-4 text-sm text-on-error-container">{{ errorMessage() }}</div>
 } @else if (car(); as vehicle) {
   <app-page-header
     [title]="vehicle.nickname || ('common.qrCode' | t)"
     [subtitle]="'cars.detailSubtitle' | t"
   >
-    <button mat-stroked-button [routerLink]="['/cars', vehicle.id, 'edit']">
-      <mat-icon>edit</mat-icon>
-      {{ 'common.edit' | t }}
+    <button
+      class="inline-flex h-11 min-w-0 items-center justify-center gap-2 rounded-full bg-surface-container-high px-3 text-sm font-semibold text-on-surface"
+      [routerLink]="['/cars', vehicle.id, 'edit']"
+    >
+      <span class="icon-slot"><mat-icon>edit</mat-icon></span>
+      <span>{{ 'common.edit' | t }}</span>
     </button>
     <button
-      mat-stroked-button
+      class="inline-flex h-11 min-w-0 items-center justify-center gap-2 rounded-full bg-surface-container-high px-3 text-sm font-semibold text-on-surface"
       [routerLink]="['/requests']"
       [queryParams]="{ carId: vehicle.id }"
     >
-      <mat-icon>notifications</mat-icon>
-      {{ 'cars.requests' | t }}
+      <span class="icon-slot"><mat-icon>notifications</mat-icon></span>
+      <span>{{ 'cars.requests' | t }}</span>
     </button>
   </app-page-header>
 
-  <div class="grid gap-6 lg:grid-cols-2">
+  <div class="grid min-w-0 gap-4 md:gap-6 lg:grid-cols-2">
     <app-qr-panel
+      class="min-w-0"
       [carId]="vehicle.id"
       [plateNumber]="vehicle.plateNumber"
       (rotated)="onRotated()"
     />
 
-    <mat-card>
-      <mat-card-header class="!px-4 !pt-5 md:!px-6 md:!pt-6">
-        <mat-card-title class="text-lg font-semibold">{{ 'cars.details' | t }}</mat-card-title>
-      </mat-card-header>
-
-      <mat-card-content class="!px-4 !pb-5 md:!px-6 md:!pb-6">
-        <dl class="divide-y divide-slate-100">
-          <div class="flex justify-between py-3">
-            <dt class="text-sm text-slate-500">{{ 'cars.status' | t }}</dt>
-            <dd class="text-sm text-slate-900">{{ (vehicle.isActive ? 'common.active' : 'common.paused') | t }}</dd>
-          </div>
-          <div class="flex justify-between py-3">
-            <dt class="text-sm text-slate-500">{{ 'cars.lastScanned' | t }}</dt>
-            <dd class="text-sm text-slate-900">
-              {{ vehicle.lastScannedAtUtc ? (vehicle.lastScannedAtUtc | relativeTime) : ('common.never' | t) }}
-            </dd>
-          </div>
-          <div class="flex justify-between py-3">
-            <dt class="text-sm text-slate-500">{{ 'cars.added' | t }}</dt>
-            <dd class="text-sm text-slate-900">{{ vehicle.createdAtUtc | relativeTime }}</dd>
-          </div>
-        </dl>
-
-        <div class="mt-4 rounded-lg bg-slate-50 p-4 text-xs text-slate-500">
-          {{ 'cars.detailHint' | t }}
+    <section class="min-w-0 overflow-hidden rounded-xl bg-surface-container-lowest p-4 shadow-sm md:p-6">
+      <h2 class="font-[family-name:var(--font-display)] text-lg font-semibold text-on-surface">
+        {{ 'cars.details' | t }}
+      </h2>
+      <dl class="mt-3 divide-y divide-surface-container-highest">
+        <div class="flex items-center justify-between gap-3 py-3">
+          <dt class="text-sm text-on-surface-variant">{{ 'cars.status' | t }}</dt>
+          <dd class="text-sm font-semibold text-on-surface">
+            {{ (vehicle.isActive ? 'common.active' : 'common.paused') | t }}
+          </dd>
         </div>
-      </mat-card-content>
-    </mat-card>
+        <div class="flex items-center justify-between gap-3 py-3">
+          <dt class="text-sm text-on-surface-variant">{{ 'cars.lastScanned' | t }}</dt>
+          <dd class="text-end text-sm text-on-surface">
+            {{ vehicle.lastScannedAtUtc ? (vehicle.lastScannedAtUtc | relativeTime) : ('common.never' | t) }}
+          </dd>
+        </div>
+        <div class="flex items-center justify-between gap-3 py-3">
+          <dt class="text-sm text-on-surface-variant">{{ 'cars.added' | t }}</dt>
+          <dd class="text-end text-sm text-on-surface">{{ vehicle.createdAtUtc | relativeTime }}</dd>
+        </div>
+      </dl>
+      <p class="mt-4 rounded-lg bg-surface-container-low p-3 text-xs leading-5 text-on-surface-variant">
+        {{ 'cars.detailHint' | t }}
+      </p>
+    </section>
   </div>
 }

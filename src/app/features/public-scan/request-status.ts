@@ -11,8 +11,6 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { interval, switchMap } from 'rxjs';
@@ -32,8 +30,6 @@ const LIVE_STATUSES = new Set(['Pending', 'Seen']);
   selector: 'app-request-status',
   imports: [
     LocalDatePipe,
-    MatCardModule,
-    MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
     RelativeTimePipe,

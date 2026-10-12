@@ -11,6 +11,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     @media (max-width: 767.98px) {
       .page-header-actions > * {
         flex: 1 1 calc(50% - 0.25rem);
+        min-width: 0;
       }
     }
   `,
