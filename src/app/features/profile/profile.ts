@@ -44,16 +44,16 @@ const E164_PATTERN = /^\+[1-9]\d{7,14}$/;
     } @else if (errorMessage() && !profile()) {
       <div class="rounded-lg bg-rose-50 p-4 text-sm text-rose-900">{{ errorMessage() }}</div>
     } @else if (profile(); as user) {
-      <div class="grid max-w-4xl gap-6 lg:grid-cols-5">
-        <mat-card class="lg:col-span-3">
-          <mat-card-header class="!px-6 !pt-6">
+      <div class="grid w-full max-w-4xl grid-cols-1 gap-4 md:gap-6 lg:grid-cols-5">
+        <mat-card class="min-w-0 lg:col-span-3">
+          <mat-card-header class="!px-4 !pt-5 md:!px-6 md:!pt-6">
             <mat-card-title class="text-lg font-semibold">Contact details</mat-card-title>
             <mat-card-subtitle>
               Scanners see a masked number. Call and WhatsApp still reach you.
             </mat-card-subtitle>
           </mat-card-header>
 
-          <mat-card-content class="!p-6">
+          <mat-card-content class="!p-4 md:!p-6">
             @if (errorMessage()) {
               <div
                 class="mb-4 flex items-start gap-2 rounded-lg bg-rose-50 p-3 text-sm text-rose-900"
@@ -107,7 +107,7 @@ const E164_PATTERN = /^\+[1-9]\d{7,14}$/;
                 <button
                   mat-flat-button
                   color="primary"
-                  class="!h-11"
+                  class="!h-11 w-full md:w-auto"
                   type="submit"
                   [disabled]="saving() || form.pristine"
                 >
@@ -118,10 +118,10 @@ const E164_PATTERN = /^\+[1-9]\d{7,14}$/;
           </mat-card-content>
         </mat-card>
 
-        <div class="flex flex-col gap-6 lg:col-span-2">
+        <div class="flex min-w-0 flex-col gap-4 md:gap-6 lg:col-span-2">
           <mat-card>
-            <mat-card-content class="!p-6">
-              <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">
+            <mat-card-content class="!p-4 md:!p-6">
+              <h2 class="mb-4 text-sm font-semibold uppercase text-slate-400">
                 Account
               </h2>
               <dl class="divide-y divide-slate-100">
@@ -144,8 +144,8 @@ const E164_PATTERN = /^\+[1-9]\d{7,14}$/;
           </mat-card>
 
           <mat-card>
-            <mat-card-content class="!p-6">
-              <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
+            <mat-card-content class="!p-4 md:!p-6">
+              <h2 class="mb-2 text-sm font-semibold uppercase text-slate-400">
                 Session
               </h2>
               <p class="mb-4 text-sm text-slate-500">

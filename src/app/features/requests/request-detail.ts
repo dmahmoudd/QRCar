@@ -43,9 +43,9 @@ import { StatusChip } from '../../shared/ui/status-chip';
     } @else if (errorMessage()) {
       <div class="rounded-lg bg-rose-50 p-4 text-sm text-rose-900">{{ errorMessage() }}</div>
     } @else if (request(); as item) {
-      <div class="grid max-w-4xl gap-6 lg:grid-cols-5">
-        <mat-card class="lg:col-span-3">
-          <mat-card-content class="!p-6">
+      <div class="grid w-full max-w-4xl grid-cols-1 gap-4 md:gap-6 lg:grid-cols-5">
+        <mat-card class="min-w-0 lg:col-span-3">
+          <mat-card-content class="!p-4 md:!p-6">
             <div class="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h1 class="text-xl font-semibold text-slate-900">{{ item.reasonLabel }}</h1>
@@ -73,10 +73,11 @@ import { StatusChip } from '../../shared/ui/status-chip';
                 <p class="mb-3 text-sm font-medium text-slate-700">
                   Let them know what you're doing
                 </p>
-                <div class="flex flex-wrap gap-2">
+                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   @for (option of responseOptions; track option.value) {
                     <button
                       mat-stroked-button
+                      class="w-full"
                       [disabled]="saving()"
                       (click)="respond(option.value)"
                     >
@@ -111,9 +112,9 @@ import { StatusChip } from '../../shared/ui/status-chip';
           </mat-card-content>
         </mat-card>
 
-        <mat-card class="lg:col-span-2">
-          <mat-card-content class="!p-6">
-            <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">
+        <mat-card class="min-w-0 lg:col-span-2">
+          <mat-card-content class="!p-4 md:!p-6">
+            <h2 class="mb-4 text-sm font-semibold uppercase text-slate-400">
               Timeline
             </h2>
 

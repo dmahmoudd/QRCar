@@ -50,8 +50,8 @@ import { PageHeader } from '../../shared/ui/page-header';
     @if (loading()) {
       <div class="grid h-64 place-items-center"><mat-spinner diameter="40" /></div>
     } @else {
-      <mat-card class="max-w-xl">
-        <mat-card-content class="!p-6">
+      <mat-card class="w-full max-w-xl">
+        <mat-card-content class="!p-4 md:!p-6">
           @if (errorMessage()) {
             <div class="mb-4 flex items-start gap-2 rounded-lg bg-rose-50 p-3 text-sm text-rose-900">
               <mat-icon class="!h-5 !w-5 !text-xl">error_outline</mat-icon>
@@ -75,11 +75,22 @@ import { PageHeader } from '../../shared/ui/page-header';
               </div>
             }
 
-            <div class="mt-4 flex gap-2">
-              <button mat-flat-button color="primary" class="!h-11" type="submit" [disabled]="saving()">
+            <div class="mt-4 flex flex-col gap-2 md:flex-row">
+              <button
+                mat-flat-button
+                color="primary"
+                class="!h-11 w-full md:w-auto"
+                type="submit"
+                [disabled]="saving()"
+              >
                 {{ saving() ? 'Saving…' : isEdit() ? 'Save' : 'Create QR code' }}
               </button>
-              <button mat-stroked-button class="!h-11" type="button" (click)="cancel()">
+              <button
+                mat-stroked-button
+                class="!h-11 w-full md:w-auto"
+                type="button"
+                (click)="cancel()"
+              >
                 Cancel
               </button>
             </div>

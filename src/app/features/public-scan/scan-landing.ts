@@ -11,7 +11,7 @@ import { environment } from '../../../environments/environment';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <mat-card>
-      <mat-card-content class="!p-8 text-center">
+      <mat-card-content class="!p-5 text-center md:!p-8">
         <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-brand-50">
           <mat-icon class="!h-7 !w-7 !text-3xl text-brand-600">security</mat-icon>
         </div>

@@ -1,4 +1,4 @@
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -44,16 +44,16 @@ const NAV_ITEMS: NavItem[] = [
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <mat-sidenav-container class="min-h-screen bg-slate-50">
+    <mat-sidenav-container class="min-h-dvh w-full max-w-full bg-slate-50">
       <mat-sidenav
-        class="w-64 border-r border-slate-200"
+        class="w-[min(18rem,86vw)] border-r border-slate-200"
         [mode]="isHandset() ? 'over' : 'side'"
         [opened]="isHandset() ? drawerOpen() : true"
         (closedStart)="drawerOpen.set(false)"
       >
         <div class="flex items-center gap-2 px-5 py-5">
           <mat-icon class="text-brand-600">qr_code_2</mat-icon>
-          <span class="font-semibold tracking-tight text-slate-800">Park Ping</span>
+          <span class="font-semibold text-slate-800">Tala3ny</span>
         </div>
 
         <mat-nav-list>
@@ -73,7 +73,7 @@ const NAV_ITEMS: NavItem[] = [
         </mat-nav-list>
       </mat-sidenav>
 
-      <mat-sidenav-content class="flex min-h-screen flex-col">
+      <mat-sidenav-content class="flex min-h-dvh w-full max-w-full flex-col overflow-x-hidden">
         <mat-toolbar class="border-b border-slate-200 bg-white">
           @if (isHandset()) {
             <button mat-icon-button aria-label="Open menu" (click)="drawerOpen.set(!drawerOpen())">
@@ -81,11 +81,14 @@ const NAV_ITEMS: NavItem[] = [
             </button>
           }
 
-          <span class="flex-1"></span>
+          <span class="min-w-0 flex-1 truncate px-2 text-base font-semibold text-slate-800">
+            @if (isHandset()) {
+              Tala3ny
+            }
+          </span>
 
-          <button mat-button [matMenuTriggerFor]="accountMenu">
+          <button mat-icon-button [matMenuTriggerFor]="accountMenu" aria-label="Account">
             <mat-icon>account_circle</mat-icon>
-            <span class="ml-1 hidden sm:inline">{{ user()?.fullName }}</span>
           </button>
 
           <mat-menu #accountMenu="matMenu">
@@ -105,7 +108,10 @@ const NAV_ITEMS: NavItem[] = [
           </mat-menu>
         </mat-toolbar>
 
-        <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
+        <main
+          class="mx-auto w-full min-w-0 max-w-6xl flex-1 px-4 py-5 md:px-6 md:py-8"
+          style="padding-bottom: max(1.25rem, env(safe-area-inset-bottom))"
+        >
           <router-outlet />
         </main>
       </mat-sidenav-content>
@@ -128,8 +134,8 @@ export class AppShell {
    * arrives as soon as the browser can measure the viewport.
    */
   protected readonly isHandset = toSignal(
-    this.breakpoints.observe(Breakpoints.Handset).pipe(map((state) => state.matches)),
-    { initialValue: false },
+    this.breakpoints.observe('(max-width: 767.98px)').pipe(map((state) => state.matches)),
+    { initialValue: true },
   );
 
   constructor() {

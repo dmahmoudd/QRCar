@@ -42,7 +42,7 @@ const LIVE_STATUSES = new Set(['Pending', 'Seen']);
       <div class="grid h-64 place-items-center"><mat-spinner diameter="40" /></div>
     } @else if (errorMessage()) {
       <mat-card>
-        <mat-card-content class="!p-8 text-center">
+        <mat-card-content class="!p-5 text-center md:!p-8">
           <mat-icon class="!h-8 !w-8 !text-3xl text-slate-400">link_off</mat-icon>
           <h1 class="mt-2 font-semibold text-slate-800">We can't find that request</h1>
           <p class="mt-1 text-sm text-slate-500">{{ errorMessage() }}</p>
@@ -50,7 +50,7 @@ const LIVE_STATUSES = new Set(['Pending', 'Seen']);
       </mat-card>
     } @else if (status(); as current) {
       <mat-card class="mb-4">
-        <mat-card-content class="!p-6 text-center">
+        <mat-card-content class="!p-4 text-center md:!p-6">
           <div
             class="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl"
             [class]="headline().panelClass"
@@ -63,7 +63,7 @@ const LIVE_STATUSES = new Set(['Pending', 'Seen']);
 
           @if (current.responseLabel) {
             <div class="mt-5 rounded-xl bg-emerald-50 p-4">
-              <p class="text-xs font-medium uppercase tracking-wide text-emerald-700">
+              <p class="text-xs font-medium uppercase text-emerald-700">
                 Owner's reply
               </p>
               <p class="mt-1 text-base font-semibold text-emerald-900">
@@ -75,7 +75,7 @@ const LIVE_STATUSES = new Set(['Pending', 'Seen']);
       </mat-card>
 
       <mat-card>
-        <mat-card-content class="!p-6">
+        <mat-card-content class="!p-4 md:!p-6">
           <ol class="space-y-4 text-sm">
             <li class="flex gap-3">
               <mat-icon class="!h-5 !w-5 !text-xl text-brand-600">check_circle</mat-icon>

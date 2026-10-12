@@ -19,21 +19,35 @@ import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (notFound()) {
+    @if (unrecognized()) {
       <mat-card>
-        <mat-card-content class="!p-8 text-center">
-          <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-slate-100">
-            <mat-icon class="!h-7 !w-7 !text-3xl text-slate-400">qr_code_2</mat-icon>
+        <mat-card-content class="!p-5 text-center md:!p-8">
+          <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-rose-50">
+            <mat-icon class="!h-7 !w-7 !text-3xl text-rose-500">error_outline</mat-icon>
           </div>
-          <h1 class="text-lg font-semibold text-slate-900">This code isn't recognised</h1>
+          <h1 class="text-lg font-semibold text-slate-900">This is not a Tala3ny QR code</h1>
           <p class="mt-2 text-sm text-slate-500">
-            The sticker may be damaged, or the owner may have replaced the code.
+            Tala3ny only accepts official stickers. This code is from another app or website, so it
+            is not in the system and cannot contact a car owner.
+          </p>
+        </mat-card-content>
+      </mat-card>
+    } @else if (notFound()) {
+      <mat-card>
+        <mat-card-content class="!p-5 text-center md:!p-8">
+          <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-rose-50">
+            <mat-icon class="!h-7 !w-7 !text-3xl text-rose-500">search_off</mat-icon>
+          </div>
+          <h1 class="text-lg font-semibold text-slate-900">This code is not in the system</h1>
+          <p class="mt-2 text-sm text-slate-500">
+            Tala3ny does not have this sticker. It may be damaged, fake, or the owner may have
+            replaced it. Ask them for a current Tala3ny code.
           </p>
         </mat-card-content>
       </mat-card>
     } @else if (retired()) {
       <mat-card>
-        <mat-card-content class="!p-8 text-center">
+        <mat-card-content class="!p-5 text-center md:!p-8">
           <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-amber-50">
             <mat-icon class="!h-7 !w-7 !text-3xl text-amber-500">history_toggle_off</mat-icon>
           </div>
@@ -43,7 +57,7 @@ import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
       </mat-card>
     } @else if (paused()) {
       <mat-card>
-        <mat-card-content class="!p-8 text-center">
+        <mat-card-content class="!p-5 text-center md:!p-8">
           <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-amber-50">
             <mat-icon class="!h-7 !w-7 !text-3xl text-amber-500">pause_circle</mat-icon>
           </div>
@@ -54,7 +68,15 @@ import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
         </mat-card-content>
       </mat-card>
     } @else if (errorMessage() && !scan()) {
-      <div class="rounded-lg bg-rose-50 p-4 text-sm text-rose-900">{{ errorMessage() }}</div>
+      <mat-card>
+        <mat-card-content class="!p-5 text-center md:!p-8">
+          <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-rose-50">
+            <mat-icon class="!h-7 !w-7 !text-3xl text-rose-500">error_outline</mat-icon>
+          </div>
+          <h1 class="text-lg font-semibold text-slate-900">Could not use this QR code</h1>
+          <p class="mt-2 text-sm text-slate-500">{{ errorMessage() }}</p>
+        </mat-card-content>
+      </mat-card>
     } @else if (scan(); as owner) {
       <mat-card class="mb-4">
         <mat-card-content class="!p-6 text-center">
@@ -66,7 +88,7 @@ import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
             Verified by the Tala3ny server. That does not prove this sticker is still on the
             original car.
           </p>
-          <p class="mt-4 font-mono text-2xl tracking-wide text-slate-900">{{ owner.maskedPhone }}</p>
+          <p class="mt-4 font-mono text-2xl text-slate-900">{{ owner.maskedPhone }}</p>
           <p class="mt-2 text-xs text-slate-400">
             This page shows only a masked hint. Starting a call or WhatsApp can still show the
             owner's number on your phone.
@@ -86,8 +108,8 @@ import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
       </mat-card>
 
       <mat-card>
-        <mat-card-content class="!p-6">
-          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-400">Last location</h2>
+        <mat-card-content class="!p-4 md:!p-6">
+          <h2 class="text-sm font-semibold uppercase text-slate-400">Last location</h2>
 
           @if (mapsUrl(); as mapLink) {
             <p class="mt-2 text-sm text-slate-600">
@@ -122,6 +144,7 @@ import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
 })
 export class ScanResult {
   readonly scan = input<OfficialScan | null>(null);
+  readonly unrecognized = input(false);
   readonly notFound = input(false);
   readonly retired = input(false);
   readonly paused = input(false);

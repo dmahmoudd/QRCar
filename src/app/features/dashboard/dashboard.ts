@@ -48,21 +48,21 @@ import { StatusChip } from '../../shared/ui/status-chip';
     } @else if (errorMessage()) {
       <div class="rounded-lg bg-rose-50 p-4 text-sm text-rose-900">{{ errorMessage() }}</div>
     } @else {
-      <div class="grid gap-4 sm:grid-cols-3">
-        <mat-card class="!p-5">
-          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Cars registered</p>
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <mat-card class="!p-4 md:!p-5">
+          <p class="text-xs font-medium uppercase text-slate-400">Cars registered</p>
           <p class="mt-2 text-3xl font-semibold text-slate-900">{{ cars().length }}</p>
         </mat-card>
 
-        <mat-card class="!p-5">
-          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Needs your reply</p>
+        <mat-card class="!p-4 md:!p-5">
+          <p class="text-xs font-medium uppercase text-slate-400">Needs your reply</p>
           <p class="mt-2 text-3xl font-semibold" [class]="pendingCount() ? 'text-amber-600' : 'text-slate-900'">
             {{ pendingCount() }}
           </p>
         </mat-card>
 
-        <mat-card class="!p-5">
-          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Total scans</p>
+        <mat-card class="!p-4 md:!p-5">
+          <p class="text-xs font-medium uppercase text-slate-400">Total scans</p>
           <p class="mt-2 text-3xl font-semibold text-slate-900">{{ totalScans() }}</p>
         </mat-card>
       </div>
@@ -89,7 +89,7 @@ import { StatusChip } from '../../shared/ui/status-chip';
               @for (request of requests().slice(0, 5); track request.id) {
                 <li>
                   <a
-                    class="flex items-start gap-4 px-5 py-4 transition hover:bg-slate-50"
+                    class="flex items-start gap-3 px-4 py-3.5 transition hover:bg-slate-50 md:gap-4 md:px-5 md:py-4"
                     [routerLink]="['/requests', request.id]"
                   >
                     <div class="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-600">
@@ -135,10 +135,10 @@ import { StatusChip } from '../../shared/ui/status-chip';
             </app-empty-state>
           </mat-card>
         } @else {
-          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             @for (car of cars(); track car.id) {
               <a [routerLink]="['/cars', car.id]" class="block">
-                <mat-card class="h-full !p-5 transition hover:shadow-md">
+                <mat-card class="h-full !p-4 transition hover:shadow-md md:!p-5">
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                       <p class="truncate font-semibold text-slate-900">

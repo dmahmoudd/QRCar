@@ -5,6 +5,8 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  NgZone,
+  computed,
   inject,
   signal,
   viewChild,
@@ -30,6 +32,7 @@ import { ScanResult } from './scan-result';
     @if (hasResult()) {
       <app-scan-result
         [scan]="scan()"
+        [unrecognized]="unrecognized()"
         [notFound]="notFound()"
         [retired]="retired()"
         [paused]="paused()"
@@ -46,14 +49,15 @@ import { ScanResult } from './scan-result';
       </button>
     } @else {
       <mat-card>
-        <mat-card-content class="!p-6">
+        <mat-card-content class="!p-4 md:!p-6">
           <div class="mb-5 text-center">
             <div class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-brand-50">
               <mat-icon class="text-brand-600">qr_code_scanner</mat-icon>
             </div>
             <h1 class="text-lg font-semibold text-slate-900">Scan a Tala3ny QR</h1>
             <p class="mt-2 text-sm text-slate-500">
-              Tala3ny checks every code with its server. Other QR codes are ignored.
+              Tala3ny checks every code with its server. Other QR codes show an error so you know
+              they are not in the system.
             </p>
             <p class="mt-2 text-xs text-slate-400">
               A recognised code does not prove the sticker is still on the original car.
@@ -122,6 +126,7 @@ export class ScanPage {
   private readonly camera = inject(QrCameraService);
   private readonly publicApi = inject(PublicScanApiService);
   private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly zone = inject(NgZone);
 
   private readonly preview = viewChild<ElementRef<HTMLVideoElement>>('preview');
 
@@ -130,6 +135,7 @@ export class ScanPage {
   protected readonly verifying = signal(false);
   protected readonly errorMessage = signal('');
   protected readonly scan = signal<OfficialScan | null>(null);
+  protected readonly unrecognized = signal(false);
   protected readonly notFound = signal(false);
   protected readonly retired = signal(false);
   protected readonly paused = signal(false);
@@ -143,9 +149,17 @@ export class ScanPage {
     });
   }
 
-  protected hasResult(): boolean {
-    return !!(this.scan() || this.notFound() || this.retired() || this.paused());
-  }
+  protected readonly hasResult = computed(
+    () =>
+      !!(
+        this.scan() ||
+        this.unrecognized() ||
+        this.notFound() ||
+        this.retired() ||
+        this.paused() ||
+        this.errorMessage()
+      ),
+  );
 
   async startScanning(): Promise<void> {
     this.resetResult();
@@ -175,7 +189,9 @@ export class ScanPage {
 
     try {
       await this.camera.start(video, (text) => {
-        void this.onDecoded(text);
+        this.zone.run(() => {
+          void this.onDecoded(text);
+        });
       });
       this.starting.set(false);
     } catch (error: unknown) {
@@ -194,6 +210,7 @@ export class ScanPage {
 
   resetResult(): void {
     this.scan.set(null);
+    this.unrecognized.set(false);
     this.notFound.set(false);
     this.retired.set(false);
     this.paused.set(false);
@@ -207,7 +224,18 @@ export class ScanPage {
     const parsed = parseTala3nyQrPayload(raw, environment.scanAllowedOrigins);
 
     if (!parsed.ok) {
-      this.errorMessage.set('This is not a valid Tala3ny QR code.');
+      const rejectedKey = `rejected:${raw.trim()}`;
+      if (this.processedToken === rejectedKey) {
+        return;
+      }
+
+      this.processedToken = rejectedKey;
+      this.unrecognized.set(true);
+      this.errorMessage.set(
+        'This QR code is not a Tala3ny sticker, so Tala3ny cannot look it up or contact a car owner.',
+      );
+      await this.stopScanning();
+      this.changeDetector.markForCheck();
       return;
     }
 
@@ -232,6 +260,7 @@ export class ScanPage {
         this.retired.set(true);
       } else if (error instanceof HttpErrorResponse && error.status === 404) {
         this.notFound.set(true);
+        this.errorMessage.set('This code is not in the Tala3ny system.');
       } else if (error instanceof HttpErrorResponse && error.status === 409) {
         this.paused.set(true);
       } else {
@@ -242,6 +271,7 @@ export class ScanPage {
     } finally {
       this.verifying.set(false);
       this.verifyingToken = false;
+      this.changeDetector.markForCheck();
     }
   }
 }

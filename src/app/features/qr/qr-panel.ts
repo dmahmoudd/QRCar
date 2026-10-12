@@ -32,14 +32,23 @@ import { ConfirmDialog, ConfirmDialogData } from '../../shared/ui/confirm-dialog
     MatTooltipModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    :host {
+      display: block;
+    }
+
+    :host ::ng-deep .qr-action.mat-mdc-button-base {
+      width: 100%;
+    }
+  `,
   template: `
     <mat-card>
-      <mat-card-header class="!px-6 !pt-6">
-        <mat-card-title class="text-lg font-semibold">QR code</mat-card-title>
-        <mat-card-subtitle>Print this and stick it on your windscreen.</mat-card-subtitle>
-      </mat-card-header>
+      <div class="px-4 pt-5 text-center md:px-6 md:pt-6 md:text-left">
+        <h2 class="text-lg font-semibold text-slate-900">QR code</h2>
+        <p class="mt-1 text-sm text-slate-500">Print this and stick it on your windscreen.</p>
+      </div>
 
-      <mat-card-content class="!px-6 !pb-6">
+      <mat-card-content class="!px-4 !pb-5 md:!px-6 md:!pb-6">
         @if (loading()) {
           <div class="grid h-64 place-items-center">
             <mat-spinner diameter="40" />
@@ -47,25 +56,25 @@ import { ConfirmDialog, ConfirmDialogData } from '../../shared/ui/confirm-dialog
         } @else if (errorMessage()) {
           <div class="rounded-lg bg-rose-50 p-4 text-sm text-rose-900">{{ errorMessage() }}</div>
         } @else if (qr(); as code) {
-          <div class="flex flex-col items-center gap-5">
-            <div class="rounded-full border border-slate-200 bg-[#fffaf3] p-3">
+          <div class="mx-auto flex w-full max-w-sm flex-col items-center gap-5">
+            <div class="mx-auto aspect-square w-full max-w-[17rem]">
               @if (imageUrl()) {
                 <img
                   [src]="imageUrl()"
                   alt="QR sticker for this car"
-                  class="h-72 w-72 object-contain"
+                  class="mx-auto block h-full w-full object-contain"
                   width="288"
                   height="288"
                 />
               }
             </div>
 
-            <div class="w-full">
-              <p class="mb-1 text-xs font-medium uppercase tracking-wide text-slate-400">
+            <div class="w-full min-w-0 text-center">
+              <p class="mb-1 text-xs font-medium uppercase text-slate-400">
                 Scan destination
               </p>
-              <div class="flex items-center gap-2 rounded-lg bg-slate-50 p-2">
-                <code class="flex-1 truncate text-xs text-slate-600">{{ code.scanUrl }}</code>
+              <div class="flex min-w-0 items-center gap-2 rounded-lg bg-slate-50 p-2 text-left">
+                <code class="min-w-0 flex-1 truncate text-xs text-slate-600">{{ code.scanUrl }}</code>
                 <button
                   mat-icon-button
                   matTooltip="Copy link"
@@ -81,22 +90,22 @@ import { ConfirmDialog, ConfirmDialogData } from '../../shared/ui/confirm-dialog
               </p>
             </div>
 
-            <div class="flex w-full flex-wrap gap-2">
-              <button mat-flat-button color="primary" (click)="download('Png')">
+            <div class="grid w-full grid-cols-2 gap-2">
+              <button mat-flat-button class="qr-action" color="primary" (click)="download('Png')">
                 <mat-icon>download</mat-icon>
                 PNG
               </button>
-              <button mat-stroked-button (click)="download('Svg')">
+              <button mat-stroked-button class="qr-action" (click)="download('Svg')">
                 <mat-icon>download</mat-icon>
                 SVG
               </button>
-              <button mat-stroked-button (click)="print(code)">
+              <button mat-stroked-button class="qr-action" (click)="print(code)">
                 <mat-icon>print</mat-icon>
                 Print
               </button>
-              <span class="flex-1"></span>
               <button
                 mat-stroked-button
+                class="qr-action"
                 matTooltip="Issues a new code and disables every sticker you already printed"
                 (click)="confirmRotate()"
               >
@@ -266,7 +275,7 @@ export class QrPanel {
     };
 
     this.dialog
-      .open(ConfirmDialog, { data, width: '420px' })
+      .open(ConfirmDialog, { data, width: 'min(420px, calc(100vw - 24px))' })
       .afterClosed()
       .subscribe((confirmed) => {
         if (confirmed) {

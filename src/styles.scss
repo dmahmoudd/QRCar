@@ -18,15 +18,37 @@ html {
 
   color-scheme: light;
   height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   min-height: 100%;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
   background: var(--mat-sys-surface-container-low);
   color: var(--mat-sys-on-surface);
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  font-family: Roboto, 'Helvetica Neue', ui-sans-serif, sans-serif;
+  font-feature-settings: normal;
+  font-variant-ligatures: none;
+  letter-spacing: normal;
+  word-spacing: normal;
   -webkit-font-smoothing: antialiased;
+}
+
+app-root {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  min-height: 100%;
+  min-height: 100dvh;
 }
 
 /* Utility for the one thing Tailwind cannot express: truncating to N lines. */
@@ -37,10 +59,10 @@ body {
   overflow: hidden;
 }
 
-/* Material icons render as ligatures; without this they flash as raw text on first paint. */
+/* Icon ligatures stay on the icon glyph only — they must not inherit onto labels. */
 .material-icons,
 .mat-icon {
-  font-family: 'Material Icons', sans-serif;
+  font-family: 'Material Icons' !important;
   font-weight: normal;
   font-style: normal;
   letter-spacing: normal;
@@ -48,8 +70,20 @@ body {
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
+  overflow: hidden;
+  flex-shrink: 0;
+  font-variant-ligatures: discretionary-ligatures;
+  font-feature-settings: 'liga';
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
+}
+
+.mat-mdc-list-item .mdc-list-item__primary-text,
+.mat-mdc-list-item span,
+.mat-mdc-button-base:not(.mat-mdc-icon-button) {
+  font-family: Roboto, 'Helvetica Neue', ui-sans-serif, sans-serif;
+  font-feature-settings: normal;
+  font-variant-ligatures: none;
 }
 
 /* Slightly tighter default card padding than Material ships with. */
@@ -84,4 +118,48 @@ textarea.mat-mdc-input-element:-webkit-autofill:active {
   caret-color: var(--mat-sys-on-surface);
   box-shadow: 0 0 0 1000px var(--mat-sys-surface, #fff) inset;
   transition: background-color 99999s ease-out;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+.mat-mdc-form-field,
+.mat-mdc-card,
+.mat-mdc-card-header,
+.mat-mdc-card-content,
+.mat-mdc-card-actions {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.mat-sidenav-container,
+.mat-drawer-content,
+.mat-sidenav-content {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.mat-toolbar {
+  padding-inline: max(0.5rem, env(safe-area-inset-left)) max(0.5rem, env(safe-area-inset-right));
+}
+
+.cdk-overlay-pane.mat-mdc-dialog-panel {
+  max-width: min(28rem, calc(100vw - 1.5rem)) !important;
+}
+
+@media (max-width: 767.98px) {
+  .mat-mdc-button-base:not(.mat-mdc-icon-button):not(.mat-mdc-menu-item) {
+    min-width: 0;
+  }
+
+  .mat-mdc-dialog-actions {
+    flex-wrap: wrap;
+    justify-content: stretch;
+  }
 }

@@ -27,14 +27,14 @@ const E164_PATTERN = /^\+[1-9]\d{7,14}$/;
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-10">
-      <div class="mb-8 text-center">
+    <div class="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-4 py-6">
+      <div class="mb-6 text-center">
         <div
           class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-brand-600 text-white"
         >
           <mat-icon class="!h-8 !w-8 !text-3xl">qr_code_2</mat-icon>
         </div>
-        <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Create your account</h1>
+        <h1 class="text-2xl font-semibold text-slate-900">Create your account</h1>
         <p class="mt-1 text-sm text-slate-500">
           People who scan your code can contact you without seeing your full number.
         </p>
@@ -45,7 +45,7 @@ const E164_PATTERN = /^\+[1-9]\d{7,14}$/;
           <mat-progress-bar mode="indeterminate" />
         }
 
-        <mat-card-content class="!p-6">
+        <mat-card-content class="!p-4 md:!p-6">
           @if (errorMessage()) {
             <div class="mb-4 flex items-start gap-2 rounded-lg bg-rose-50 p-3 text-sm text-rose-900">
               <mat-icon class="!h-5 !w-5 !text-xl">error_outline</mat-icon>
@@ -107,7 +107,7 @@ const E164_PATTERN = /^\+[1-9]\d{7,14}$/;
             <button
               mat-flat-button
               color="primary"
-              class="!mt-4 !h-11"
+              class="!mt-4 !h-11 w-full"
               type="submit"
               [disabled]="loading()"
             >

@@ -53,9 +53,9 @@ import { ConfirmDialog, ConfirmDialogData } from '../../shared/ui/confirm-dialog
         </app-empty-state>
       </mat-card>
     } @else {
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         @for (car of cars(); track car.id) {
-          <mat-card class="!p-5">
+          <mat-card class="!p-4 md:!p-5">
             <div class="flex items-start justify-between gap-2">
               <a [routerLink]="['/cars', car.id]" class="min-w-0 flex-1">
                 <p class="truncate font-semibold text-slate-900">
@@ -137,7 +137,7 @@ export class CarList {
     };
 
     this.dialog
-      .open(ConfirmDialog, { data, width: '440px' })
+      .open(ConfirmDialog, { data, width: 'min(440px, calc(100vw - 24px))' })
       .afterClosed()
       .subscribe((confirmed) => {
         if (confirmed) {

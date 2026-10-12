@@ -24,15 +24,15 @@ import { extractErrorMessage } from '../../core/http/problem-details';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-10">
-      <div class="mb-8 text-center">
+    <div class="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-4 py-6">
+      <div class="mb-6 text-center">
         <div
           class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-brand-600 text-white"
         >
           <mat-icon class="!h-8 !w-8 !text-3xl">qr_code_2</mat-icon>
         </div>
-        <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Welcome back</h1>
-        <p class="mt-1 text-sm text-slate-500">Sign in to manage your cars and QR codes.</p>
+        <h1 class="text-2xl font-semibold text-slate-900">Welcome back</h1>
+        <p class="mt-1 text-sm leading-5 text-slate-500">Sign in to manage your cars and QR codes.</p>
       </div>
 
       <mat-card class="p-2">
@@ -40,7 +40,7 @@ import { extractErrorMessage } from '../../core/http/problem-details';
           <mat-progress-bar mode="indeterminate" />
         }
 
-        <mat-card-content class="!p-6">
+        <mat-card-content class="!p-4 md:!p-6">
           @if (expired()) {
             <div
               class="mb-4 flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-900"
@@ -91,7 +91,7 @@ import { extractErrorMessage } from '../../core/http/problem-details';
             <button
               mat-flat-button
               color="primary"
-              class="!mt-2 !h-11"
+              class="!mt-2 !h-11 w-full"
               type="submit"
               [disabled]="loading()"
             >

@@ -40,11 +40,11 @@ const FILTERS: ReadonlyArray<{ label: string; value: ParkingRequestStatus | '' }
       subtitle="Messages from people who scanned one of your QR codes."
     />
 
-    <div class="mb-4 flex flex-wrap gap-2">
+    <div class="-mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-1">
       @for (filter of filters; track filter.value) {
         <button
           type="button"
-          class="rounded-full px-3.5 py-1.5 text-sm font-medium transition"
+          class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition"
           [class]="
             activeFilter() === filter.value
               ? 'bg-brand-600 text-white'
@@ -75,7 +75,7 @@ const FILTERS: ReadonlyArray<{ label: string; value: ParkingRequestStatus | '' }
           @for (request of requests(); track request.id) {
             <li>
               <a
-                class="flex items-start gap-4 px-5 py-4 transition hover:bg-slate-50"
+                class="flex items-start gap-3 px-4 py-3.5 transition hover:bg-slate-50 md:gap-4 md:px-5 md:py-4"
                 [routerLink]="['/requests', request.id]"
               >
                 <div

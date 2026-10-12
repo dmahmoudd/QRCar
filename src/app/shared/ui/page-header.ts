@@ -3,15 +3,28 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 @Component({
   selector: 'app-page-header',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    :host {
+      display: block;
+    }
+
+    @media (max-width: 767.98px) {
+      .page-header-actions > * {
+        flex: 1 1 calc(50% - 0.25rem);
+      }
+    }
+  `,
   template: `
-    <header class="mb-6 flex flex-wrap items-start justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight text-slate-900">{{ title() }}</h1>
+    <header
+      class="mb-5 flex flex-col items-stretch gap-3 text-left md:mb-6 md:flex-row md:items-start md:justify-between"
+    >
+      <div class="min-w-0">
+        <h1 class="text-xl font-semibold break-words text-slate-900 md:text-2xl">{{ title() }}</h1>
         @if (subtitle()) {
-          <p class="mt-1 text-sm text-slate-500">{{ subtitle() }}</p>
+          <p class="mt-1 text-sm leading-5 text-slate-500">{{ subtitle() }}</p>
         }
       </div>
-      <div class="flex items-center gap-2">
+      <div class="page-header-actions flex w-full flex-wrap gap-2 md:w-auto md:flex-nowrap md:justify-end">
         <ng-content />
       </div>
     </header>

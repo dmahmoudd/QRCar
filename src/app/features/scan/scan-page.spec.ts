@@ -91,9 +91,27 @@ describe('ScanPage', () => {
 
   it('rejects an external QR without calling the API or navigating', async () => {
     await page.onDecoded(`https://evil.example/c/${TOKEN}`);
+    fixture.detectChanges();
 
     expect(router.navigate).not.toHaveBeenCalled();
-    expect(page['errorMessage']()).toBe('This is not a valid Tala3ny QR code.');
+    expect(camera.stop).toHaveBeenCalled();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'This is not a Tala3ny QR code',
+    );
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Scan another');
+  });
+
+  it('shows an error for a random QR that is not in the system', async () => {
+    await page.onDecoded('WIFI:S:Cafe;T:WPA;P:secret;;');
+    fixture.detectChanges();
+
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'This is not a Tala3ny QR code',
+    );
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'cannot contact a car owner',
+    );
   });
 
   it('does not validate twice for the same valid scan', async () => {
@@ -114,7 +132,7 @@ describe('ScanPage', () => {
     );
     await missing;
     fixture.detectChanges();
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain("isn't recognised");
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('not in the system');
     expect((fixture.nativeElement as HTMLElement).textContent).not.toContain(recognised.maskedPhone);
 
     page.resetResult();

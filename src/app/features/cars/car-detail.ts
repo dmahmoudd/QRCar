@@ -38,7 +38,11 @@ import { QrPanel } from '../qr/qr-panel';
           <mat-icon>edit</mat-icon>
           Edit
         </button>
-        <button mat-stroked-button [routerLink]="['/requests']" [queryParams]="{ carId: vehicle.id }">
+        <button
+          mat-stroked-button
+          [routerLink]="['/requests']"
+          [queryParams]="{ carId: vehicle.id }"
+        >
           <mat-icon>notifications</mat-icon>
           Requests
         </button>
@@ -52,11 +56,11 @@ import { QrPanel } from '../qr/qr-panel';
         />
 
         <mat-card>
-          <mat-card-header class="!px-6 !pt-6">
+          <mat-card-header class="!px-4 !pt-5 md:!px-6 md:!pt-6">
             <mat-card-title class="text-lg font-semibold">Details</mat-card-title>
           </mat-card-header>
 
-          <mat-card-content class="!px-6 !pb-6">
+          <mat-card-content class="!px-4 !pb-5 md:!px-6 md:!pb-6">
             <dl class="divide-y divide-slate-100">
               <div class="flex justify-between py-3">
                 <dt class="text-sm text-slate-500">Status</dt>

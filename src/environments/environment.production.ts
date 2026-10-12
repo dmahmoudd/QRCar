@@ -1,12 +1,21 @@
 import { OFFICIAL_TALA3NY_ORIGINS } from '../app/core/qr/tala3ny-qr-payload';
 
+const PAGES_API_BASE_URL = 'https://qrcar.pages.dev/api/v1';
+
+function isNativeCapacitor(): boolean {
+  const capacitor = (globalThis as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
+  return capacitor?.isNativePlatform?.() === true;
+}
+
 export const environment = {
   production: true,
   /**
-   * Same-origin so the browser stays on HTTPS (Cloudflare Pages). A Pages Function
-   * forwards /api/v1 to the MonsterASP API, which does not have working TLS yet.
+   * Website: same-origin `/api/v1` so Cloudflare Pages can proxy to MonsterASP.
+   * Capacitor has no Pages Function, so the packaged app must call the live site.
    */
-  apiBaseUrl: '/api/v1',
+  get apiBaseUrl(): string {
+    return isNativeCapacitor() ? PAGES_API_BASE_URL : '/api/v1';
+  },
   scanAllowedOrigins: OFFICIAL_TALA3NY_ORIGINS,
   officialScannerPath: '/scan',
   /**
