@@ -1,0 +1,123 @@
+<app-page-header title="Profile" subtitle="Your contact details and account information." />
+
+@if (loading()) {
+  <div class="grid h-64 place-items-center"><mat-spinner diameter="40" /></div>
+} @else if (errorMessage() && !profile()) {
+  <div class="rounded-lg bg-rose-50 p-4 text-sm text-rose-900">{{ errorMessage() }}</div>
+} @else if (profile(); as user) {
+  <div class="grid w-full max-w-4xl grid-cols-1 gap-4 md:gap-6 lg:grid-cols-5">
+    <mat-card class="min-w-0 lg:col-span-3">
+      <mat-card-header class="!px-4 !pt-5 md:!px-6 md:!pt-6">
+        <mat-card-title class="text-lg font-semibold">Contact details</mat-card-title>
+        <mat-card-subtitle>
+          Scanners see a masked number. Call and WhatsApp still reach you.
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content class="!p-4 md:!p-6">
+        @if (errorMessage()) {
+          <div
+            class="mb-4 flex items-start gap-2 rounded-lg bg-rose-50 p-3 text-sm text-rose-900"
+          >
+            <mat-icon class="!h-5 !w-5 !text-xl">error_outline</mat-icon>
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Full name</mat-label>
+            <input matInput formControlName="fullName" autocomplete="name" />
+            @if (form.controls.fullName.touched && form.controls.fullName.invalid) {
+              <mat-error>Your name is required.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Phone number</mat-label>
+            <input matInput formControlName="phoneNumber" placeholder="+905551112233" />
+            <mat-hint>Include the country code. Stored encrypted; not shown in full on the scan page.</mat-hint>
+            @if (form.controls.phoneNumber.touched && form.controls.phoneNumber.invalid) {
+              <mat-error>Use international format, for example +905551112233.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput [value]="user.email" disabled />
+            <mat-hint>Email cannot be changed yet.</mat-hint>
+          </mat-form-field>
+
+          <div class="mt-2 rounded-lg bg-slate-50 p-4">
+            <mat-slide-toggle formControlName="shareLocation">
+              Share my last location
+            </mat-slide-toggle>
+            <p class="mt-2 text-xs text-slate-500">
+              When on, this tab asks the browser for GPS and stores the last successful ping.
+              Anyone who scans your code can open that point on a map. A switched-off or
+              closed phone cannot send a new position — they only see the last ping.
+            </p>
+            @if (user.lastLocatedAtUtc) {
+              <p class="mt-2 text-xs text-slate-400">
+                Last ping {{ user.lastLocatedAtUtc | relativeTime }}
+              </p>
+            }
+          </div>
+
+          <div class="mt-3 flex gap-2">
+            <button
+              mat-flat-button
+              color="primary"
+              class="!h-11 w-full md:w-auto"
+              type="submit"
+              [disabled]="saving() || form.pristine"
+            >
+              {{ saving() ? 'Saving…' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="flex min-w-0 flex-col gap-4 md:gap-6 lg:col-span-2">
+      <mat-card>
+        <mat-card-content class="!p-4 md:!p-6">
+          <h2 class="mb-4 text-sm font-semibold uppercase text-slate-400">
+            Account
+          </h2>
+          <dl class="divide-y divide-slate-100">
+            <div class="flex justify-between py-3">
+              <dt class="text-sm text-slate-500">Cars</dt>
+              <dd class="text-sm font-medium text-slate-900">{{ user.carCount }}</dd>
+            </div>
+            <div class="flex justify-between py-3">
+              <dt class="text-sm text-slate-500">Role</dt>
+              <dd class="text-sm text-slate-900">{{ user.role }}</dd>
+            </div>
+            <div class="flex justify-between py-3">
+              <dt class="text-sm text-slate-500">Member since</dt>
+              <dd class="text-sm text-slate-900">
+                {{ user.createdAtUtc | date: 'mediumDate' }}
+              </dd>
+            </div>
+          </dl>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card>
+        <mat-card-content class="!p-4 md:!p-6">
+          <h2 class="mb-2 text-sm font-semibold uppercase text-slate-400">
+            Session
+          </h2>
+          <p class="mb-4 text-sm text-slate-500">
+            Signing out removes the access token from this device.
+          </p>
+          <button mat-stroked-button (click)="signOut()">
+            <mat-icon>logout</mat-icon>
+            Sign out
+          </button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+}

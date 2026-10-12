@@ -15,6 +15,14 @@ export function extractErrorMessage(error: unknown, fallback = 'Something went w
     return 'Cannot reach the server. Check that the API is running.';
   }
 
+  if (error.status === 503) {
+    const unavailable = error.error as ProblemDetails | null;
+    if (unavailable && typeof unavailable === 'object' && unavailable.detail) {
+      return unavailable.detail;
+    }
+    return 'The database is starting up. Wait a few seconds and try again.';
+  }
+
   const problem = error.error as ProblemDetails | string | null;
 
   if (typeof problem === 'string' && problem.trim()) {

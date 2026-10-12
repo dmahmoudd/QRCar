@@ -12,6 +12,7 @@
 
 @theme {
   --font-sans: Roboto, 'Helvetica Neue', ui-sans-serif, system-ui, sans-serif;
+  --default-font-family: Roboto, 'Helvetica Neue', ui-sans-serif, system-ui, sans-serif;
   --color-brand-50: #eef2ff;
   --color-brand-100: #e0e7ff;
   --color-brand-200: #c7d2fe;
@@ -23,6 +24,3 @@
   --color-brand-800: #3730a3;
   --color-brand-900: #312e81;
 }
-
-/* After the theme so this face cannot become the default sans font. */
-@import '@fontsource/material-icons';

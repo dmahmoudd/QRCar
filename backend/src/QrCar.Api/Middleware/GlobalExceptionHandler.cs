@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using QrCar.Application.Common.Exceptions;
 using QrCar.Domain.Exceptions;
 
@@ -87,6 +88,12 @@ public class GlobalExceptionHandler : IExceptionHandler
 
             TooManyRequestsException => Problem(
                 StatusCodes.Status429TooManyRequests, "Too many requests", exception.Message, instance),
+
+            SqlException => Problem(
+                StatusCodes.Status503ServiceUnavailable,
+                "Database unavailable",
+                "The database is starting up. Wait a few seconds and try again.",
+                instance),
 
             // Nothing internal is echoed back to the caller; the detail goes to the log instead.
             _ => Problem(

@@ -14,24 +14,7 @@ export interface ConfirmDialogData {
   selector: 'app-confirm-dialog',
   imports: [MatDialogModule, MatButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <h2 mat-dialog-title>{{ data.title }}</h2>
-    <mat-dialog-content>
-      <p class="text-sm text-slate-600">{{ data.message }}</p>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end" class="!flex-wrap">
-      <button mat-button (click)="dialogRef.close(false)">
-        {{ data.cancelLabel ?? 'Cancel' }}
-      </button>
-      <button
-        mat-flat-button
-        [color]="data.destructive ? 'warn' : 'primary'"
-        (click)="dialogRef.close(true)"
-      >
-        {{ data.confirmLabel ?? 'Confirm' }}
-      </button>
-    </mat-dialog-actions>
-  `,
+  templateUrl: './confirm-dialog.html',
 })
 export class ConfirmDialog {
   protected readonly dialogRef = inject(MatDialogRef<ConfirmDialog, boolean>);

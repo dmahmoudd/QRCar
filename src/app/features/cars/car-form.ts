@@ -27,78 +27,7 @@ import { PageHeader } from '../../shared/ui/page-header';
     PageHeader,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <app-page-header
-      [title]="isEdit() ? 'Edit QR code' : 'Create a QR code'"
-      [subtitle]="
-        isEdit()
-          ? 'This sticker shows your phone number to anyone who scans it.'
-          : 'Print the code and put it where someone can scan it. They will see your number.'
-      "
-    />
-
-    @if (welcome() && !isEdit()) {
-      <div class="mb-6 flex items-start gap-3 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-900">
-        <mat-icon class="!h-5 !w-5 !text-xl">check_circle</mat-icon>
-        <span>
-          Account created. Create a QR code now. Scanners can call you without seeing the full
-          number.
-        </span>
-      </div>
-    }
-
-    @if (loading()) {
-      <div class="grid h-64 place-items-center"><mat-spinner diameter="40" /></div>
-    } @else {
-      <mat-card class="w-full max-w-xl">
-        <mat-card-content class="!p-4 md:!p-6">
-          @if (errorMessage()) {
-            <div class="mb-4 flex items-start gap-2 rounded-lg bg-rose-50 p-3 text-sm text-rose-900">
-              <mat-icon class="!h-5 !w-5 !text-xl">error_outline</mat-icon>
-              <span>{{ errorMessage() }}</span>
-            </div>
-          }
-
-          <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-2">
-            <mat-form-field appearance="outline">
-              <mat-label>Label (optional)</mat-label>
-              <input matInput formControlName="nickname" placeholder="Windscreen, bag, keys…" />
-              <mat-hint>Only you see this. Helps if you print more than one code.</mat-hint>
-            </mat-form-field>
-
-            @if (isEdit()) {
-              <div class="mt-2 rounded-lg bg-slate-50 p-4">
-                <mat-slide-toggle formControlName="isActive">Code is active</mat-slide-toggle>
-                <p class="mt-1 text-xs text-slate-500">
-                  When off, the sticker no longer shows your number as a live contact.
-                </p>
-              </div>
-            }
-
-            <div class="mt-4 flex flex-col gap-2 md:flex-row">
-              <button
-                mat-flat-button
-                color="primary"
-                class="!h-11 w-full md:w-auto"
-                type="submit"
-                [disabled]="saving()"
-              >
-                {{ saving() ? 'Saving…' : isEdit() ? 'Save' : 'Create QR code' }}
-              </button>
-              <button
-                mat-stroked-button
-                class="!h-11 w-full md:w-auto"
-                type="button"
-                (click)="cancel()"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </mat-card-content>
-      </mat-card>
-    }
-  `,
+  templateUrl: './car-form.html',
 })
 export class CarForm {
   readonly carId = input<string>('');

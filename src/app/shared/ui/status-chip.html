@@ -1,0 +1,7 @@
+<span
+  class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset"
+  [class]="style().classes"
+>
+  <mat-icon class="!h-4 !w-4 !text-base leading-none">{{ style().icon }}</mat-icon>
+  {{ label() || style().label }}
+</span>

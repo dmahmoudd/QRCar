@@ -11,8 +11,13 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'r/:trackingRef', renderMode: RenderMode.Client },
   { path: 'scan', renderMode: RenderMode.Client },
 
-  { path: 'login', renderMode: RenderMode.Prerender },
-  { path: 'register', renderMode: RenderMode.Prerender },
+  /*
+   * Material form fields emit different IDs on the server and in the browser.
+   * Prerendering these pages then hydrating them leaves the server HTML in place
+   * and paints a second copy underneath.
+   */
+  { path: 'login', renderMode: RenderMode.Client },
+  { path: 'register', renderMode: RenderMode.Client },
 
   /*
    * Everything else is behind the auth guard and depends on a token held in localStorage,
