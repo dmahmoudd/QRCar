@@ -1,0 +1,74 @@
+<article
+  class="flex min-w-0 flex-col gap-5 overflow-hidden rounded-xl bg-surface-container-lowest p-5 shadow-sm md:p-6"
+>
+  <div class="flex items-start justify-between gap-3">
+    <div class="flex min-w-0 items-center gap-3">
+      <div
+        class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary-container/20 text-primary"
+      >
+        <span class="icon-slot"><mat-icon>directions_car</mat-icon></span>
+      </div>
+      <div class="min-w-0">
+        <h2 class="truncate font-[family-name:var(--font-display)] text-xl font-semibold text-on-surface">
+          {{ car().nickname || ('common.qrCode' | t) }}
+        </h2>
+        <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-on-surface-variant">
+          <span class="inline-flex items-center gap-1">
+            <span class="icon-slot icon-slot-sm text-primary"><mat-icon>history</mat-icon></span>
+            <span>
+              {{ 'cars.lastScanned' | t }}:
+              <strong class="font-semibold text-on-surface">
+                {{ car().lastScannedAtUtc ? (car().lastScannedAtUtc | relativeTime) : ('common.never' | t) }}
+              </strong>
+            </span>
+          </span>
+        </p>
+      </div>
+    </div>
+
+    <div class="flex shrink-0 items-center gap-1">
+      <span
+        class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wide"
+        [class]="
+          car().isActive
+            ? 'bg-emerald-50 text-emerald-800'
+            : 'bg-surface-container-high text-on-surface-variant'
+        "
+      >
+        <span
+          class="h-1.5 w-1.5 rounded-full"
+          [class.bg-emerald-500]="car().isActive"
+          [class.animate-pulse]="car().isActive"
+          [class.bg-outline]="!car().isActive"
+        ></span>
+        {{ (car().isActive ? 'common.active' : 'common.paused') | t }}
+      </span>
+
+      <button
+        type="button"
+        class="grid h-8 w-8 place-items-center rounded-full text-on-surface-variant hover:bg-surface-container"
+        [matMenuTriggerFor]="menu"
+        [attr.aria-label]="'cars.actions' | t"
+      >
+        <span class="icon-slot icon-slot-sm"><mat-icon>more_vert</mat-icon></span>
+      </button>
+      <mat-menu #menu="matMenu">
+        <a mat-menu-item [routerLink]="['/cars', car().id, 'edit']">
+          <mat-icon>edit</mat-icon>
+          <span>{{ 'cars.editDetails' | t }}</span>
+        </a>
+        <button mat-menu-item (click)="remove.emit(car())">
+          <mat-icon>delete_outline</mat-icon>
+          <span>{{ 'cars.remove' | t }}</span>
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+
+  <app-qr-panel
+    [carId]="car().id"
+    [plateNumber]="car().plateNumber"
+    [embedded]="true"
+    (rotated)="rotated.emit()"
+  />
+</article>

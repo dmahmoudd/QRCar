@@ -35,6 +35,8 @@ import { ConfirmDialog, ConfirmDialogData } from '../../shared/ui/confirm-dialog
 export class QrPanel {
   readonly carId = input.required<string>();
   readonly plateNumber = input<string>('');
+  /** Drops the outer title when the panel sits inside a car sticker card. */
+  readonly embedded = input(false);
 
   /** Fired after a successful rotation so the parent can refresh its own copy of the car. */
   readonly rotated = output<QrCode>();
