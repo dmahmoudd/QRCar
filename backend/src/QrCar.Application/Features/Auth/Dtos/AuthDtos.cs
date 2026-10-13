@@ -11,3 +11,9 @@ public record AuthResponse(
     string TokenType,
     DateTime ExpiresAtUtc,
     AuthUserSummary User);
+
+public record ForgotPasswordRequest(string Email);
+
+public record ForgotPasswordResponse(bool Exists, string? ResetToken);
+
+public record ResetPasswordRequest(string Token, string Password);

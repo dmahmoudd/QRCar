@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using QrCar.Application.Common.Interfaces;
 using QrCar.Application.Common.Options;
 using QrCar.Infrastructure.Common;
+using QrCar.Infrastructure.Email;
 using QrCar.Infrastructure.Identity;
 using QrCar.Infrastructure.Persistence;
 using QrCar.Infrastructure.Persistence.Interceptors;
@@ -47,6 +48,10 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(PublicScanOptions.SectionName))
             .ValidateOnStart();
 
+        services.AddOptions<EmailOptions>()
+            .Bind(configuration.GetSection(EmailOptions.SectionName))
+            .ValidateOnStart();
+
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddSingleton<AuditingInterceptor>();
 
@@ -85,6 +90,7 @@ public static class DependencyInjection
         services.AddSingleton<IQrCodeService, QrCodeService>();
 #pragma warning restore CA1416
         services.AddSingleton<IPublicUrlBuilder, PublicUrlBuilder>();
+        services.AddSingleton<IEmailSender, SmtpEmailSender>();
 
         return services;
     }

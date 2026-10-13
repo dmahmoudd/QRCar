@@ -7,7 +7,17 @@
     "Issuer": "QrCar.Api",
     "Audience": "QrCar.Client",
     "SigningKey": "REPLACE_WITH_48_PLUS_RANDOM_CHARS",
-    "AccessTokenMinutes": 60
+    "AccessTokenMinutes": 60,
+    "PasswordResetMinutes": 30
+  },
+  "Email": {
+    "Host": "",
+    "Port": 587,
+    "EnableSsl": true,
+    "UserName": "",
+    "Password": "",
+    "From": "noreply@tala3ny.app",
+    "FromName": "Tala3ny"
   },
   "Security": {
     "EncryptionKey": "REPLACE_WITH_BASE64_32_BYTES",

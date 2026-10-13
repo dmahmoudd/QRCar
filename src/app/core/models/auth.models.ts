@@ -10,6 +10,11 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface ForgotPasswordResponse {
+  exists: boolean;
+  resetToken?: string | null;
+}
+
 export interface AuthUserSummary {
   id: string;
   fullName: string;

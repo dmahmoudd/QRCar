@@ -10,6 +10,8 @@ namespace QrCar.Application.Features.Auth;
 
 public class AuthService : IAuthService
 {
+    private const string InvalidResetLink = "This reset link is invalid or has expired.";
+
     private readonly IAppDbContext _db;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenService _tokenService;
@@ -93,6 +95,43 @@ public class AuthService : IAuthService
         }
 
         return BuildAuthResponse(user);
+    }
+
+    public async Task<string?> ForgotPasswordAsync(
+        ForgotPasswordRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedEmail = TextNormalizer.NormalizeEmail(request.Email);
+
+        var user = await _db.Users
+            .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail, cancellationToken);
+
+        if (user is null || !user.IsActive)
+        {
+            return null;
+        }
+
+        return _tokenService.CreatePasswordResetToken(user);
+    }
+
+    public async Task ResetPasswordAsync(
+        ResetPasswordRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_tokenService.TryReadPasswordResetToken(request.Token, out var userId, out var stamp))
+        {
+            throw new AppValidationException("token", InvalidResetLink);
+        }
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        if (user is null || !user.IsActive || !_tokenService.MatchesPasswordStamp(user.PasswordHash, stamp))
+        {
+            throw new AppValidationException("token", InvalidResetLink);
+        }
+
+        user.PasswordHash = _passwordHasher.Hash(request.Password);
+        await _db.SaveChangesAsync(cancellationToken);
     }
 
     private AuthResponse BuildAuthResponse(User user)

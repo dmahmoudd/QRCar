@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   AuthResponse,
   AuthUserSummary,
+  ForgotPasswordResponse,
   LoginRequest,
   RegisterRequest,
   StoredSession,
@@ -39,6 +40,21 @@ export class AuthService {
     return this.http
       .post<AuthResponse>(`${environment.apiBaseUrl}/auth/login`, request)
       .pipe(tap((response) => this.startSession(response)));
+  }
+
+  forgotPassword(email: string): Observable<ForgotPasswordResponse> {
+    return this.http.post<ForgotPasswordResponse>(
+      `${environment.apiBaseUrl}/auth/forgot-password`,
+      { email },
+    );
+  }
+
+  resetPassword(token: string, password: string): Observable<unknown> {
+    return this.http.post(
+      `${environment.apiBaseUrl}/auth/reset-password`,
+      { token, password },
+      { responseType: 'text' },
+    );
   }
 
   /**

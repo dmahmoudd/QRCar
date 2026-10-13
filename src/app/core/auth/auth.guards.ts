@@ -14,7 +14,7 @@ export const authGuard: CanActivateFn = (_route, state) => {
   return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
 };
 
-/** Keeps signed-in users off the login and register screens. */
+/** Keeps signed-in users off the login, register, and password-reset screens. */
 export const guestGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);

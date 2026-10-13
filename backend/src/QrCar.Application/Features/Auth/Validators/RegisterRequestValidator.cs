@@ -26,6 +26,6 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
             .Matches(@"^\+[1-9]\d{7,14}$")
-            .WithMessage("Phone number must be in E.164 format, for example +905551112233.");
+            .WithMessage("Phone number must be in E.164 format, for example +201012345678.");
     }
 }

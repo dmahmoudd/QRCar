@@ -89,7 +89,7 @@ export class IncomingRequestAlertService {
       try {
         const popup = new Notification(this.i18n.t('ownerAlert.title'), {
           body: this.i18n.t('ownerAlert.body', { reason }),
-          icon: 'logo-mark.svg',
+          icon: 'brand-logo.png',
         });
         popup.onclick = () => {
           window.focus();

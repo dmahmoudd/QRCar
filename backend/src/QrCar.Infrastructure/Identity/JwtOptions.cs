@@ -15,4 +15,7 @@ public class JwtOptions
     public string SigningKey { get; set; } = string.Empty;
 
     public int AccessTokenMinutes { get; set; } = 60;
+
+    /// <summary>How long a forgot-password link stays valid.</summary>
+    public int PasswordResetMinutes { get; set; } = 30;
 }

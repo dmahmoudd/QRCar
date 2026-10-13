@@ -42,4 +42,30 @@ public class AuthController : ControllerBase
     {
         return Ok(await _authService.LoginAsync(request, cancellationToken));
     }
+
+    /// <summary>
+    /// Checks whether the email belongs to an active account. When it does, a short-lived
+    /// token is returned so the client can collect a new password on the next screen.
+    /// </summary>
+    [HttpPost("forgot-password")]
+    [ProducesResponseType(typeof(ForgotPasswordResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ForgotPasswordResponse>> ForgotPassword(
+        ForgotPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        var token = await _authService.ForgotPasswordAsync(request, cancellationToken);
+        return Ok(new ForgotPasswordResponse(token is not null, token));
+    }
+
+    /// <summary>Sets a new password from a one-time reset link.</summary>
+    [HttpPost("reset-password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ResetPassword(
+        ResetPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _authService.ResetPasswordAsync(request, cancellationToken);
+        return NoContent();
+    }
 }

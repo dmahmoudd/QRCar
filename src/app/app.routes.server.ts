@@ -18,6 +18,8 @@ export const serverRoutes: ServerRoute[] = [
    */
   { path: 'login', renderMode: RenderMode.Client },
   { path: 'register', renderMode: RenderMode.Client },
+  { path: 'forgot-password', renderMode: RenderMode.Client },
+  { path: 'reset-password', renderMode: RenderMode.Client },
 
   /*
    * Everything else is behind the auth guard and depends on a token held in localStorage,
